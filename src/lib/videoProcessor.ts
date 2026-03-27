@@ -40,7 +40,7 @@ function normalizeClip(inputPath: string, outputPath: string): Promise<void> {
         '-r 30',
       ])
       .output(outputPath)
-      .on('end', resolve)
+      .on('end', () => resolve())
       .on('error', (err) => reject(new Error(`Normalize error: ${err.message}`)))
       .run()
   })
@@ -117,7 +117,7 @@ export async function buildVideo(
         .inputOptions(['-f concat', '-safe 0'])
         .outputOptions(['-c copy'])
         .output(concatPath)
-        .on('end', resolve)
+        .on('end', () => resolve())
         .on('error', (err) => reject(new Error(`Concat error: ${err.message}`)))
         .run()
     })
@@ -156,7 +156,7 @@ export async function buildVideo(
       cmd
         .outputOptions(outputOpts)
         .output(outputPath)
-        .on('end', resolve)
+        .on('end', () => resolve())
         .on('error', (err) => reject(new Error(`FFmpeg error: ${err.message}`)))
         .run()
     })
