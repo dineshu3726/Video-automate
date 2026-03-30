@@ -17,6 +17,7 @@ const STATUS_CONFIG: Record<
   approved:   { label: 'Approved',   color: 'text-green-400',   bg: 'bg-green-900/40', icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
   rejected:   { label: 'Rejected',   color: 'text-red-400',     bg: 'bg-red-900/40',   icon: <XCircle className="w-3.5 h-3.5" /> },
   published:  { label: 'Published',  color: 'text-emerald-400', bg: 'bg-emerald-900/40',icon: <Upload className="w-3.5 h-3.5" /> },
+  failed:     { label: 'Failed',     color: 'text-red-400',     bg: 'bg-red-900/40',   icon: <XCircle className="w-3.5 h-3.5" /> },
 }
 
 function CardInner({ job, onDelete }: { job: VideoJob; onDelete?: (id: string) => void }) {
@@ -77,6 +78,9 @@ function CardInner({ job, onDelete }: { job: VideoJob; onDelete?: (id: string) =
         </div>
         {job.metadata?.title && (
           <p className="text-gray-400 text-xs mt-1 truncate">{job.metadata.title}</p>
+        )}
+        {job.status === 'failed' && job.metadata?.error && (
+          <p className="text-red-400 text-xs mt-1 truncate">{job.metadata.error}</p>
         )}
         <div className="flex items-center justify-between mt-1.5">
           <p className="text-gray-600 text-xs">{date}</p>

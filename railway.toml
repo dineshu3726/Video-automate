@@ -8,4 +8,4 @@ restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
 [nixpacks]
-aptPkgs = ["fonts-dejavu-core", "fonts-liberation"]
+aptPkgs = ["ffmpeg", "fonts-dejavu-core", "fonts-liberation"]

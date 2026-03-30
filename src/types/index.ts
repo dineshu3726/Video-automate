@@ -7,6 +7,7 @@ export type VideoStatus =
   | 'approved'
   | 'rejected'
   | 'published'
+  | 'failed'
 
 export interface VideoJob {
   id: string
@@ -27,6 +28,7 @@ export interface VideoJob {
       youtube?: string            // https://youtube.com/shorts/{id}
       instagram?: string          // https://www.instagram.com/p/{id}
     }
+    error?: string                // error message if status is 'failed'
   } | null
   created_at: string
   updated_at: string

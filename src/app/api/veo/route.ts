@@ -48,8 +48,12 @@ async function processVideoInBackground(
       })
       .eq('id', jobId)
   } catch (err) {
-    console.error('[video/generate] background error:', err)
-    await admin.from('video_jobs').update({ status: 'generating' }).eq('id', jobId)
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[video/generate] background error:', message)
+    await admin
+      .from('video_jobs')
+      .update({ status: 'failed', metadata: { ...job.metadata, error: message } })
+      .eq('id', jobId)
   }
 }
 

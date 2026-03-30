@@ -5,7 +5,15 @@ import { join } from 'path'
 import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path)
+// Prefer system ffmpeg (Railway/Linux) over the installer binary
+function resolveFfmpegPath(): string {
+  const systemPaths = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/nix/var/nix/profiles/default/bin/ffmpeg']
+  for (const p of systemPaths) {
+    if (existsSync(p)) return p
+  }
+  return ffmpegInstaller.path
+}
+ffmpeg.setFfmpegPath(resolveFfmpegPath())
 
 function getSystemFont(): string {
   const candidates = [
