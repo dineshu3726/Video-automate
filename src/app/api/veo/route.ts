@@ -12,6 +12,15 @@ async function processVideoInBackground(
   const admin = createAdminClient()
   const { veo_prompt, title, tags } = job.metadata ?? {}
 
+  // Abort the whole pipeline after 8 minutes
+  const timeout = setTimeout(async () => {
+    console.error('[video/generate] timeout for job', jobId)
+    await admin
+      .from('video_jobs')
+      .update({ status: 'failed', metadata: { ...job.metadata, error: 'Processing timed out after 8 minutes' } })
+      .eq('id', jobId)
+  }, 8 * 60 * 1000)
+
   try {
     const { data: fullJob } = await admin
       .from('video_jobs')
@@ -47,7 +56,9 @@ async function processVideoInBackground(
         metadata: { ...job.metadata, storage_path: storagePath },
       })
       .eq('id', jobId)
+    clearTimeout(timeout)
   } catch (err) {
+    clearTimeout(timeout)
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error('[video/generate] background error:', message)
     await admin

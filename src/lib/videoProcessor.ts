@@ -73,15 +73,23 @@ async function generateVoice(script: string, workDir: string): Promise<string | 
     }
     if (current) chunks.push(current.trim())
 
-    // Fetch each chunk and combine
+    // Fetch each chunk and combine (5s timeout per chunk)
     const buffers: Buffer[] = []
     for (const chunk of chunks) {
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=en&client=tw-ob&ttsspeed=0.9`
-      const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' },
-      })
-      if (!res.ok) continue
-      buffers.push(Buffer.from(await res.arrayBuffer()))
+      try {
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=en&client=tw-ob&ttsspeed=0.9`
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), 5_000)
+        const res = await fetch(url, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' },
+          signal: controller.signal,
+        })
+        clearTimeout(timer)
+        if (!res.ok) continue
+        buffers.push(Buffer.from(await res.arrayBuffer()))
+      } catch {
+        continue
+      }
     }
 
     if (!buffers.length) return null
