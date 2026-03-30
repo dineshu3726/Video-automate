@@ -3,6 +3,56 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { searchPexelsVideoUrls } from '@/lib/pexels'
 import { buildVideo } from '@/lib/videoProcessor'
 
+async function processVideoInBackground(
+  jobId: string,
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  job: any
+) {
+  const admin = createAdminClient()
+  const { veo_prompt, title, tags } = job.metadata ?? {}
+
+  try {
+    const { data: fullJob } = await admin
+      .from('video_jobs')
+      .select('script')
+      .eq('id', jobId)
+      .single()
+    const script = fullJob?.script ?? undefined
+
+    const keyword = (tags?.[0] ?? title ?? veo_prompt).split(' ').slice(0, 3).join(' ')
+    const videoUrls = await searchPexelsVideoUrls(keyword, 3)
+
+    await admin.from('video_jobs').update({ status: 'processing' }).eq('id', jobId)
+    const videoBuffer = await buildVideo(videoUrls, title ?? keyword, script)
+
+    const storagePath = `${userId}/${jobId}.mp4`
+    const { error: uploadError } = await admin.storage
+      .from('videos')
+      .upload(storagePath, videoBuffer, { contentType: 'video/mp4', upsert: true })
+
+    if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`)
+
+    const { data: signedData, error: signError } = await admin.storage
+      .from('videos')
+      .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
+
+    if (signError || !signedData) throw new Error('Failed to create signed URL')
+
+    await admin
+      .from('video_jobs')
+      .update({
+        status: 'review',
+        video_url: signedData.signedUrl,
+        metadata: { ...job.metadata, storage_path: storagePath },
+      })
+      .eq('id', jobId)
+  } catch (err) {
+    console.error('[video/generate] background error:', err)
+    await admin.from('video_jobs').update({ status: 'generating' }).eq('id', jobId)
+  }
+}
+
 export async function POST(request: Request) {
   // 1. Auth
   const supabase = await createClient()
@@ -34,60 +84,11 @@ export async function POST(request: Request) {
   if (jobError || !job) return Response.json({ error: 'Job not found' }, { status: 404 })
   if (job.status !== 'generating') return Response.json({ error: 'Job not in generating status' }, { status: 409 })
 
-  const { veo_prompt, title, tags } = job.metadata ?? {}
+  const { veo_prompt } = job.metadata ?? {}
   if (!veo_prompt) return Response.json({ error: 'No video prompt found on job' }, { status: 422 })
 
-  // Also fetch the script for voice narration
-  const { data: fullJob } = await admin
-    .from('video_jobs')
-    .select('script')
-    .eq('id', jobId)
-    .single()
-  const script = fullJob?.script ?? undefined
+  // 4. Fire processing in background — respond immediately so Railway doesn't timeout
+  setImmediate(() => processVideoInBackground(jobId, user.id, job))
 
-  try {
-    // 4. Build search keywords from tags + title
-    const keyword = (tags?.[0] ?? title ?? veo_prompt).split(' ').slice(0, 3).join(' ')
-
-    // 5. Fetch 3 portrait stock clips from Pexels
-    const videoUrls = await searchPexelsVideoUrls(keyword, 3)
-
-    // 6. Stitch clips + voice narration + title overlay with FFmpeg
-    await admin.from('video_jobs').update({ status: 'processing' }).eq('id', jobId)
-    const videoBuffer = await buildVideo(videoUrls, title ?? keyword, script)
-
-    // 7. Upload to Supabase Storage
-    const storagePath = `${user.id}/${jobId}.mp4`
-    const { error: uploadError } = await admin.storage
-      .from('videos')
-      .upload(storagePath, videoBuffer, { contentType: 'video/mp4', upsert: true })
-
-    if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`)
-
-    // 8. Create signed URL (7 days)
-    const { data: signedData, error: signError } = await admin.storage
-      .from('videos')
-      .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
-
-    if (signError || !signedData) throw new Error('Failed to create signed URL')
-
-    // 9. Advance job to review
-    await admin
-      .from('video_jobs')
-      .update({
-        status: 'review',
-        video_url: signedData.signedUrl,
-        metadata: { ...job.metadata, storage_path: storagePath },
-      })
-      .eq('id', jobId)
-
-    return Response.json({ done: true, videoUrl: signedData.signedUrl })
-  } catch (err) {
-    console.error('[video/generate] error:', err)
-    await admin.from('video_jobs').update({ status: 'generating' }).eq('id', jobId)
-    return Response.json(
-      { error: err instanceof Error ? err.message : 'Video generation failed' },
-      { status: 500 }
-    )
-  }
+  return Response.json({ started: true })
 }
