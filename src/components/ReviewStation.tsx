@@ -7,6 +7,7 @@ import MetadataEditor, { VideoMetadata } from './MetadataEditor'
 import {
   CheckCircle2, XCircle, Loader2, Play, Pause,
   Volume2, VolumeX, RotateCcw, ArrowLeft, FileText,
+  RefreshCw, ChevronDown,
 } from 'lucide-react'
 
 interface Props {
@@ -22,6 +23,8 @@ export default function ReviewStation({ job }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showScript, setShowScript] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
+  const [showRegenMenu, setShowRegenMenu] = useState(false)
 
   const [metadata, setMetadata] = useState<VideoMetadata>({
     title: job.metadata?.title ?? '',
@@ -69,6 +72,24 @@ export default function ReviewStation({ job }: Props) {
 
     // Navigate back to dashboard after a brief success flash
     setTimeout(() => router.push('/dashboard'), 800)
+  }
+
+  async function handleRegenerate(mode: 'video' | 'all') {
+    setShowRegenMenu(false)
+    setRegenerating(true)
+    setError(null)
+    const res = await fetch('/api/regenerate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobId: job.id, mode }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      setError(body.error ?? 'Regeneration failed')
+      setRegenerating(false)
+      return
+    }
+    router.push('/dashboard')
   }
 
   return (
@@ -184,6 +205,49 @@ export default function ReviewStation({ job }: Props) {
                 }
                 Approve
               </button>
+            </div>
+
+            {/* Regenerate dropdown */}
+            <div className="relative w-full" style={{ maxWidth: '270px' }}>
+              <div className="flex rounded-xl overflow-hidden border border-gray-700">
+                <button
+                  onClick={() => handleRegenerate('video')}
+                  disabled={loading || regenerating}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {regenerating
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <RefreshCw className="w-3.5 h-3.5" />
+                  }
+                  Regenerate Video
+                </button>
+                <button
+                  onClick={() => setShowRegenMenu(!showRegenMenu)}
+                  disabled={loading || regenerating}
+                  className="px-2.5 bg-gray-800 hover:bg-gray-700 border-l border-gray-700 text-gray-400 hover:text-white transition disabled:opacity-50"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {showRegenMenu && (
+                <div className="absolute bottom-full mb-1 left-0 right-0 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-xl z-10">
+                  <button
+                    onClick={() => handleRegenerate('video')}
+                    className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                  >
+                    <p className="font-medium">Regenerate Video Only</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Keep script, fetch new visuals & sound</p>
+                  </button>
+                  <div className="border-t border-gray-700" />
+                  <button
+                    onClick={() => handleRegenerate('all')}
+                    className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                  >
+                    <p className="font-medium">Regenerate Everything</p>
+                    <p className="text-xs text-gray-500 mt-0.5">New script, new visuals & sound</p>
+                  </button>
+                </div>
+              )}
             </div>
 
             {error && (

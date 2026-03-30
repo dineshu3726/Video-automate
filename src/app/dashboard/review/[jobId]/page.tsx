@@ -25,7 +25,7 @@ export default async function ReviewPage({ params }: Props) {
 
   // Only jobs in 'review' status belong on this page;
   // redirect already-decided jobs back to the dashboard
-  if (!['review'].includes(job.status)) {
+  if (!['review', 'generating', 'scripting', 'processing'].includes(job.status)) {
     redirect('/dashboard')
   }
 
