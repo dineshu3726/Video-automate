@@ -30,7 +30,7 @@ async function processVideoInBackground(
     const script = fullJob?.script ?? undefined
 
     const keyword = (tags?.[0] ?? title ?? veo_prompt).split(' ').slice(0, 3).join(' ')
-    const videoUrls = await searchPexelsVideoUrls(keyword, 3)
+    const videoUrls = await searchPexelsVideoUrls(keyword, 2)
 
     await admin.from('video_jobs').update({ status: 'processing' }).eq('id', jobId)
     const videoBuffer = await buildVideo(videoUrls, title ?? keyword, script)

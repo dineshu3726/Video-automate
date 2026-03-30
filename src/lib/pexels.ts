@@ -29,10 +29,11 @@ export async function searchPexelsVideoUrls(query: string, count = 3): Promise<s
   if (!data.videos?.length) throw new Error(`No Pexels videos found for: ${query}`)
 
   return data.videos.map((video) => {
+    // Prefer SD portrait to keep file sizes small and avoid OOM on Railway
     const file =
-      video.video_files.find((f) => f.quality === 'hd' && f.height > f.width) ||
-      video.video_files.find((f) => f.quality === 'hd') ||
       video.video_files.find((f) => f.quality === 'sd' && f.height > f.width) ||
+      video.video_files.find((f) => f.quality === 'sd') ||
+      video.video_files.find((f) => f.height > f.width) ||
       video.video_files[0]
     return file.link
   })

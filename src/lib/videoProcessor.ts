@@ -60,20 +60,21 @@ function normalizeClip(inputPath: string, outputPath: string): Promise<void> {
     new Promise<void>((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions([
-          '-t 10',
-          '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
+          '-t 8',
+          '-vf', 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280',
           '-c:v libx264',
           '-preset ultrafast',
-          '-crf 28',
+          '-crf 30',
           '-an',
-          '-r 30',
+          '-r 24',
+          '-threads', '1',
         ])
         .output(outputPath)
         .on('end', () => { console.log('[videoProcessor] normalized', outputPath); resolve() })
         .on('error', (err) => reject(new Error(`Normalize error: ${err.message}`)))
         .run()
     }),
-    90_000,
+    120_000,
     'normalizeClip'
   )
 }
@@ -190,11 +191,12 @@ export async function buildVideo(
         if (voicePath) cmd.input(voicePath)
 
         const outputOpts = [
-          '-t 30',
+          '-t 20',
           '-c:v libx264',
           '-preset ultrafast',
-          '-crf 26',
+          '-crf 30',
           '-movflags +faststart',
+          '-threads', '1',
         ]
         if (voicePath) outputOpts.push('-c:a aac', '-b:a 128k', '-shortest')
 
