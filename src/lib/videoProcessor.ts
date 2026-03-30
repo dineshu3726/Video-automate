@@ -13,53 +13,77 @@ function resolveFfmpegPath(): string {
   }
   return ffmpegInstaller.path
 }
-ffmpeg.setFfmpegPath(resolveFfmpegPath())
+const FFMPEG_PATH = resolveFfmpegPath()
+ffmpeg.setFfmpegPath(FFMPEG_PATH)
+console.log('[videoProcessor] ffmpeg path:', FFMPEG_PATH)
 
 function getSystemFont(): string {
   const candidates = [
-    // macOS
-    '/System/Library/Fonts/Helvetica.ttc',
-    '/System/Library/Fonts/Arial.ttf',
-    '/Library/Fonts/Arial.ttf',
-    // Linux (Railway/Render)
     '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
     '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
     '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+    '/System/Library/Fonts/Helvetica.ttc',
+    '/Library/Fonts/Arial.ttf',
   ]
   return candidates.find((f) => existsSync(f)) ?? ''
 }
 
+// Wraps a promise with a hard timeout
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+    ),
+  ])
+}
+
 async function downloadClip(url: string, destPath: string): Promise<void> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Failed to download clip: ${res.status}`)
-  await writeFile(destPath, Buffer.from(await res.arrayBuffer()))
+  console.log('[videoProcessor] downloading clip:', url)
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 30_000)
+  try {
+    const res = await fetch(url, { signal: controller.signal })
+    clearTimeout(timer)
+    if (!res.ok) throw new Error(`Failed to download clip: ${res.status}`)
+    await writeFile(destPath, Buffer.from(await res.arrayBuffer()))
+    console.log('[videoProcessor] downloaded clip to', destPath)
+  } catch (err) {
+    clearTimeout(timer)
+    throw err
+  }
 }
 
 function normalizeClip(inputPath: string, outputPath: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    ffmpeg(inputPath)
-      .outputOptions([
-        '-t 10',
-        '-vf scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
-        '-c:v libx264',
-        '-preset fast',
-        '-crf 28',
-        '-an',
-        '-r 30',
-      ])
-      .output(outputPath)
-      .on('end', () => resolve())
-      .on('error', (err) => reject(new Error(`Normalize error: ${err.message}`)))
-      .run()
-  })
+  console.log('[videoProcessor] normalizing', inputPath)
+  return withTimeout(
+    new Promise<void>((resolve, reject) => {
+      ffmpeg(inputPath)
+        .outputOptions([
+          '-t 10',
+          '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
+          '-c:v libx264',
+          '-preset ultrafast',
+          '-crf 28',
+          '-an',
+          '-r 30',
+        ])
+        .output(outputPath)
+        .on('end', () => { console.log('[videoProcessor] normalized', outputPath); resolve() })
+        .on('error', (err) => reject(new Error(`Normalize error: ${err.message}`)))
+        .run()
+    }),
+    90_000,
+    'normalizeClip'
+  )
 }
 
 // Cross-platform TTS using Google Translate endpoint — free, no API key
 async function generateVoice(script: string, workDir: string): Promise<string | null> {
   try {
+    console.log('[videoProcessor] generating TTS voice')
     const mp3Path = join(workDir, 'voice.mp3')
 
-    // Split into 200-char chunks (Google TTS limit per request)
     const words = script.replace(/\n/g, ' ').split(' ')
     const chunks: string[] = []
     let current = ''
@@ -73,7 +97,6 @@ async function generateVoice(script: string, workDir: string): Promise<string | 
     }
     if (current) chunks.push(current.trim())
 
-    // Fetch each chunk and combine (5s timeout per chunk)
     const buffers: Buffer[] = []
     for (const chunk of chunks) {
       try {
@@ -92,10 +115,10 @@ async function generateVoice(script: string, workDir: string): Promise<string | 
       }
     }
 
-    if (!buffers.length) return null
+    if (!buffers.length) { console.log('[videoProcessor] TTS returned no audio, skipping'); return null }
 
-    // Write combined MP3
     await writeFile(mp3Path, Buffer.concat(buffers))
+    console.log('[videoProcessor] TTS voice saved')
     return mp3Path
   } catch (err) {
     console.warn('[videoProcessor] TTS skipped:', err)
@@ -110,11 +133,16 @@ export async function buildVideo(
 ): Promise<Buffer> {
   const workDir = join('/tmp', `vf-${randomUUID()}`)
   await mkdir(workDir, { recursive: true })
+  console.log('[videoProcessor] buildVideo start, workDir:', workDir)
 
   try {
     // 1. Download clips in parallel
     const rawPaths = videoUrls.map((_, i) => join(workDir, `raw_${i}.mp4`))
-    await Promise.all(videoUrls.map((url, i) => downloadClip(url, rawPaths[i])))
+    await withTimeout(
+      Promise.all(videoUrls.map((url, i) => downloadClip(url, rawPaths[i]))),
+      60_000,
+      'downloadClips'
+    )
 
     // 2. Normalize each clip
     const normPaths = videoUrls.map((_, i) => join(workDir, `norm_${i}.mp4`))
@@ -123,25 +151,31 @@ export async function buildVideo(
     }
 
     // 3. Concat normalized clips
+    console.log('[videoProcessor] concatenating clips')
     const concatFile = join(workDir, 'concat.txt')
     await writeFile(concatFile, normPaths.map((p) => `file '${p}'`).join('\n'))
 
     const concatPath = join(workDir, 'concat.mp4')
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg()
-        .input(concatFile)
-        .inputOptions(['-f concat', '-safe 0'])
-        .outputOptions(['-c copy'])
-        .output(concatPath)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(new Error(`Concat error: ${err.message}`)))
-        .run()
-    })
+    await withTimeout(
+      new Promise<void>((resolve, reject) => {
+        ffmpeg()
+          .input(concatFile)
+          .inputOptions(['-f concat', '-safe 0'])
+          .outputOptions(['-c copy'])
+          .output(concatPath)
+          .on('end', () => { console.log('[videoProcessor] concat done'); resolve() })
+          .on('error', (err) => reject(new Error(`Concat error: ${err.message}`)))
+          .run()
+      }),
+      60_000,
+      'concat'
+    )
 
-    // 4. Generate cross-platform TTS voice
-    const voicePath = script ? await generateVoice(script, workDir) : null
+    // 4. Generate TTS voice (best-effort — skipped if unavailable)
+    const voicePath = script ? await withTimeout(generateVoice(script, workDir), 30_000, 'generateVoice').catch(() => null) : null
 
-    // 5. Add title overlay + mix audio
+    // 5. Final encode: title overlay + optional audio
+    console.log('[videoProcessor] final encode, font:', getSystemFont())
     const outputPath = join(workDir, 'output.mp4')
     const fontPath = getSystemFont()
     const safeTitle = title
@@ -150,34 +184,40 @@ export async function buildVideo(
       .replace(/:/g, '\\:')
       .slice(0, 60)
 
-    await new Promise<void>((resolve, reject) => {
-      const cmd = ffmpeg(concatPath)
-      if (voicePath) cmd.input(voicePath)
+    await withTimeout(
+      new Promise<void>((resolve, reject) => {
+        const cmd = ffmpeg(concatPath)
+        if (voicePath) cmd.input(voicePath)
 
-      const outputOpts = [
-        '-t 30',
-        '-c:v libx264',
-        '-preset fast',
-        '-crf 26',
-        '-movflags +faststart',
-      ]
-      if (voicePath) outputOpts.push('-c:a aac', '-b:a 128k', '-shortest')
+        const outputOpts = [
+          '-t 30',
+          '-c:v libx264',
+          '-preset ultrafast',
+          '-crf 26',
+          '-movflags +faststart',
+        ]
+        if (voicePath) outputOpts.push('-c:a aac', '-b:a 128k', '-shortest')
 
-      if (fontPath) {
-        cmd.videoFilters(
-          `drawtext=fontfile='${fontPath}':text='${safeTitle}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h-160:box=1:boxcolor=black@0.55:boxborderw=10`
-        )
-      }
+        if (fontPath) {
+          cmd.videoFilters(
+            `drawtext=fontfile='${fontPath}':text='${safeTitle}':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h-160:box=1:boxcolor=black@0.55:boxborderw=10`
+          )
+        }
 
-      cmd
-        .outputOptions(outputOpts)
-        .output(outputPath)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(new Error(`FFmpeg error: ${err.message}`)))
-        .run()
-    })
+        cmd
+          .outputOptions(outputOpts)
+          .output(outputPath)
+          .on('end', () => { console.log('[videoProcessor] final encode done'); resolve() })
+          .on('error', (err) => reject(new Error(`FFmpeg final encode error: ${err.message}`)))
+          .run()
+      }),
+      3 * 60_000,
+      'finalEncode'
+    )
 
-    return await readFile(outputPath)
+    const buf = await readFile(outputPath)
+    console.log('[videoProcessor] video ready, size:', buf.length)
+    return buf
   } finally {
     await rm(workDir, { recursive: true, force: true })
   }
