@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 # Install ffmpeg + yt-dlp (pre-built binary, no Python needed)
-RUN apt-get update && apt-get install -y ffmpeg curl --no-install-recommends && \
+RUN apt-get update && apt-get install -y ffmpeg curl ca-certificates --no-install-recommends && \
     curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
       -o /usr/local/bin/yt-dlp && \
     chmod +x /usr/local/bin/yt-dlp && \
