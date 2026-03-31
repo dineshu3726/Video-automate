@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 import {
   ArrowLeft, Download, Loader2, AlertCircle,
   Film, Music, Youtube, Clock, Eye, User,
@@ -94,21 +95,22 @@ export default function DownloaderPage() {
   const audioFormats = info?.formats.filter((f) => !f.hasVideo) ?? []
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-text">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
+            className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
           >
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
-          <div className="h-4 w-px bg-gray-700" />
-          <div className="flex items-center gap-2">
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-2 flex-1">
             <Youtube className="w-4 h-4 text-red-400" />
-            <span className="text-white font-medium text-sm">YouTube Downloader</span>
+            <span className="text-text font-medium text-sm">YouTube Downloader</span>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -118,8 +120,8 @@ export default function DownloaderPage() {
           <div className="w-14 h-14 bg-red-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Youtube className="w-7 h-7 text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white">YouTube Video Downloader</h1>
-          <p className="text-gray-400 text-sm">Paste a YouTube URL to download the video in your preferred quality</p>
+          <h1 className="text-2xl font-bold text-text">YouTube Video Downloader</h1>
+          <p className="text-muted text-sm">Paste a YouTube URL to download the video in your preferred quality</p>
         </div>
 
         {/* URL Input */}
@@ -129,7 +131,7 @@ export default function DownloaderPage() {
             value={url}
             onChange={(e) => { setUrl(e.target.value); setError(null); setInfo(null) }}
             placeholder="https://www.youtube.com/watch?v=..."
-            className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition"
+            className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-text placeholder-muted text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition"
           />
           <button
             type="submit"
@@ -153,7 +155,7 @@ export default function DownloaderPage() {
         {info && (
           <div className="space-y-6">
             {/* Thumbnail + meta */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+            <div className="bg-surface border border-border rounded-2xl overflow-hidden">
               {info.thumbnail && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -163,8 +165,8 @@ export default function DownloaderPage() {
                 />
               )}
               <div className="p-5 space-y-3">
-                <h2 className="text-white font-semibold text-base leading-snug">{info.title}</h2>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                <h2 className="text-text font-semibold text-base leading-snug">{info.title}</h2>
+                <div className="flex flex-wrap items-center gap-4 text-xs text-muted">
                   {info.author && (
                     <span className="flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5" /> {info.author}
@@ -189,20 +191,20 @@ export default function DownloaderPage() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Film className="w-4 h-4 text-violet-400" />
-                  <h3 className="text-sm font-semibold text-white">Video</h3>
-                  <span className="text-xs text-gray-600">(includes audio)</span>
+                  <h3 className="text-sm font-semibold text-text">Video</h3>
+                  <span className="text-xs text-muted/50">(includes audio)</span>
                 </div>
                 <div className="space-y-2">
                   {videoFormats.map((f) => (
                     <div
                       key={f.itag}
-                      className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+                      className="flex items-center justify-between bg-surface border border-border rounded-xl px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-white">{f.label}</span>
-                        <span className="text-xs text-gray-600 uppercase">{f.container}</span>
+                        <span className="text-sm font-medium text-text">{f.label}</span>
+                        <span className="text-xs text-muted/50 uppercase">{f.container}</span>
                         {f.approxSizeMB && (
-                          <span className="text-xs text-gray-500">~{f.approxSizeMB} MB</span>
+                          <span className="text-xs text-muted">~{f.approxSizeMB} MB</span>
                         )}
                       </div>
                       <button
@@ -227,19 +229,19 @@ export default function DownloaderPage() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Music className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-semibold text-white">Audio Only</h3>
+                  <h3 className="text-sm font-semibold text-text">Audio Only</h3>
                 </div>
                 <div className="space-y-2">
                   {audioFormats.map((f) => (
                     <div
                       key={f.itag}
-                      className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+                      className="flex items-center justify-between bg-surface border border-border rounded-xl px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-white">{f.label}</span>
-                        <span className="text-xs text-gray-600 uppercase">{f.container}</span>
+                        <span className="text-sm font-medium text-text">{f.label}</span>
+                        <span className="text-xs text-muted/50 uppercase">{f.container}</span>
                         {f.approxSizeMB && (
-                          <span className="text-xs text-gray-500">~{f.approxSizeMB} MB</span>
+                          <span className="text-xs text-muted">~{f.approxSizeMB} MB</span>
                         )}
                       </div>
                       <button

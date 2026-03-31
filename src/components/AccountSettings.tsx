@@ -7,6 +7,7 @@ import {
   CheckCircle2, XCircle, Loader2, Settings, Clock,
 } from 'lucide-react'
 import Link from 'next/link'
+import ThemeToggle from './ThemeToggle'
 
 interface Props {
   userId: string
@@ -25,7 +26,7 @@ export default function AccountSettings({
   flashConnected, flashError,
 }: Props) {
   const [interval, setInterval] = useState(String(initialInterval))
-  const [time, setTime] = useState(initialTime.slice(0, 5)) // HH:MM
+  const [time, setTime] = useState(initialTime.slice(0, 5))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -69,26 +70,26 @@ export default function AccountSettings({
   ]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-text">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
+            className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
           >
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
-          <div className="h-4 w-px bg-gray-700" />
-          <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-gray-500" />
-            <span className="text-white font-medium text-sm">Settings</span>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-2 flex-1">
+            <Settings className="w-4 h-4 text-muted" />
+            <span className="text-text font-medium text-sm">Settings</span>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-10 space-y-8">
-        {/* Flash messages */}
         {flashConnected && (
           <div className="flex items-center gap-2 bg-green-900/30 border border-green-800/50 rounded-xl px-4 py-3 text-green-300 text-sm">
             <CheckCircle2 className="w-4 h-4" />
@@ -104,18 +105,18 @@ export default function AccountSettings({
 
         {/* Account */}
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-xs font-bold">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Account</h2>
+          <div className="bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-xs font-bold text-white">
               {email[0]?.toUpperCase()}
             </div>
-            <span className="text-gray-300 text-sm">{email}</span>
+            <span className="text-muted text-sm">{email}</span>
           </div>
         </div>
 
         {/* Social platforms */}
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
             Connected Platforms
           </h2>
           <div className="space-y-3">
@@ -126,8 +127,8 @@ export default function AccountSettings({
               >
                 <div className={p.color}>{p.icon}</div>
                 <div className="flex-1">
-                  <p className="text-white text-sm font-medium">{p.label}</p>
-                  <p className="text-gray-500 text-xs">{p.sublabel}</p>
+                  <p className="text-text text-sm font-medium">{p.label}</p>
+                  <p className="text-muted text-xs">{p.sublabel}</p>
                 </div>
                 {p.connected ? (
                   <div className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
@@ -137,7 +138,7 @@ export default function AccountSettings({
                 ) : (
                   <a
                     href={p.connectHref}
-                    className="text-xs font-medium bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white px-3 py-1.5 rounded-lg transition"
+                    className="text-xs font-medium bg-surface2 hover:bg-surface border border-border text-text px-3 py-1.5 rounded-lg transition"
                   >
                     Connect
                   </a>
@@ -149,18 +150,18 @@ export default function AccountSettings({
 
         {/* Post schedule */}
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Clock className="w-3.5 h-3.5" /> Post Schedule
           </h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
+          <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
             <div>
-              <label className="text-xs text-gray-500 mb-1.5 block">
+              <label className="text-xs text-muted mb-1.5 block">
                 Post every N hours (auto-publish approved videos)
               </label>
               <select
                 value={interval}
                 onChange={(e) => setInterval(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition"
+                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-violet-500 transition"
               >
                 {[1, 2, 4, 6, 12, 24, 48, 72].map((h) => (
                   <option key={h} value={h}>
@@ -170,12 +171,12 @@ export default function AccountSettings({
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1.5 block">Preferred posting time</label>
+              <label className="text-xs text-muted mb-1.5 block">Preferred posting time</label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition"
+                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-violet-500 transition"
               />
             </div>
             <button
@@ -190,11 +191,11 @@ export default function AccountSettings({
         </div>
 
         {/* VideoForge logo */}
-        <div className="flex items-center gap-2 pt-4 border-t border-gray-800">
+        <div className="flex items-center gap-2 pt-4 border-t border-border">
           <div className="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center">
             <Video className="w-3 h-3 text-white" />
           </div>
-          <span className="text-gray-600 text-xs">VideoForge</span>
+          <span className="text-muted/50 text-xs">VideoForge</span>
         </div>
       </main>
     </div>

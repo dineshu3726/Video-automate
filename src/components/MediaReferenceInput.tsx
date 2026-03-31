@@ -12,7 +12,6 @@ interface Props {
   onJobCreated: () => void
 }
 
-// Format seconds as mm:ss
 function fmt(sec: number) {
   const m = Math.floor(sec / 60).toString().padStart(2, '0')
   const s = Math.floor(sec % 60).toString().padStart(2, '0')
@@ -25,12 +24,10 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
   const [stage, setStage] = useState<Stage>('idle')
   const [error, setError] = useState<string | null>(null)
 
-  // Upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Recorder state
   const [recording, setRecording] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
   const [recordSeconds, setRecordSeconds] = useState(0)
@@ -42,12 +39,10 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
   const supabase = createClient()
   const isLoading = ['creating', 'uploading', 'analyzing'].includes(stage)
 
-  // Clean up audio URL on unmount
   useEffect(() => {
     return () => { if (audioUrl) URL.revokeObjectURL(audioUrl) }
   }, [audioUrl])
 
-  // ── File upload handlers ──────────────────────────────────────────────────
   function handleFileSelect(file: File) {
     const allowed = ['video/mp4', 'video/quicktime', 'video/webm', 'video/avi']
     if (!allowed.includes(file.type) && !file.name.match(/\.(mp4|mov|webm|avi)$/i)) {
@@ -69,7 +64,6 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
     if (file) handleFileSelect(file)
   }
 
-  // ── Audio recorder handlers ───────────────────────────────────────────────
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -108,7 +102,6 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
     setRecordSeconds(0)
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = useCallback(async () => {
     const fileToUpload = mode === 'upload' ? selectedFile : recordedBlob
       ? new File([recordedBlob], 'recording.webm', { type: recordedBlob.type })
@@ -174,27 +167,26 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-      {/* Header toggle */}
+    <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-6 py-4 text-sm hover:bg-gray-800/50 transition"
+        className="w-full flex items-center justify-between px-6 py-4 text-sm hover:bg-surface2/50 transition"
       >
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-emerald-600/20 rounded-lg flex items-center justify-center">
             <Film className="w-3.5 h-3.5 text-emerald-400" />
           </div>
           <div className="text-left">
-            <p className="text-white font-medium text-sm">Upload or Record Reference</p>
-            <p className="text-gray-500 text-xs">Upload a video file or record audio to describe your idea</p>
+            <p className="text-text font-medium text-sm">Upload or Record Reference</p>
+            <p className="text-muted text-xs">Upload a video file or record audio to describe your idea</p>
           </div>
         </div>
-        <span className="text-gray-600 text-xs">{open ? '▲' : '▼'}</span>
+        <span className="text-muted/50 text-xs">{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
-        <div className="border-t border-gray-800 px-6 pb-6">
+        <div className="border-t border-border px-6 pb-6">
           {/* Mode tabs */}
           <div className="flex gap-2 mt-4 mb-5">
             {(['upload', 'record'] as Mode[]).map((m) => (
@@ -207,7 +199,7 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
                     ? m === 'upload'
                       ? 'bg-emerald-600 text-white'
                       : 'bg-violet-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:text-white'
+                    : 'bg-surface2 text-muted hover:text-text'
                 }`}
               >
                 {m === 'upload' ? <Upload className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
@@ -216,7 +208,7 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
             ))}
           </div>
 
-          {/* ── Upload panel ── */}
+          {/* Upload panel */}
           {mode === 'upload' && (
             <div className="space-y-4">
               <div
@@ -229,7 +221,7 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
                     ? 'border-emerald-500 bg-emerald-900/10'
                     : selectedFile
                     ? 'border-emerald-600 bg-emerald-900/10'
-                    : 'border-gray-700 hover:border-gray-600'
+                    : 'border-border hover:border-muted/40'
                 }`}
               >
                 <input
@@ -246,39 +238,38 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
                         <Film className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div className="text-left min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{selectedFile.name}</p>
-                        <p className="text-gray-500 text-xs">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                        <p className="text-text text-sm font-medium truncate">{selectedFile.name}</p>
+                        <p className="text-muted text-xs">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setSelectedFile(null) }}
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition flex-shrink-0"
+                      className="p-1.5 rounded-lg text-muted hover:text-red-400 hover:bg-red-900/20 transition flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm font-medium">Drop video here or click to browse</p>
-                    <p className="text-gray-600 text-xs mt-1">MP4, MOV, WebM, AVI — max 100MB</p>
+                    <Upload className="w-8 h-8 text-muted/40 mx-auto mb-2" />
+                    <p className="text-muted text-sm font-medium">Drop video here or click to browse</p>
+                    <p className="text-muted/50 text-xs mt-1">MP4, MOV, WebM, AVI — max 100MB</p>
                   </>
                 )}
               </div>
             </div>
           )}
 
-          {/* ── Record panel ── */}
+          {/* Record panel */}
           {mode === 'record' && (
             <div className="space-y-4">
-              <p className="text-gray-400 text-xs">
+              <p className="text-muted text-xs">
                 Describe the kind of video you want — topic, style, mood, anything. Gemini will listen and generate content matching your description.
               </p>
-              <div className="bg-gray-800 rounded-xl p-5 flex flex-col items-center gap-4">
+              <div className="bg-surface2 rounded-xl p-5 flex flex-col items-center gap-4">
                 {!recordedBlob ? (
                   <>
-                    {/* Recording indicator */}
                     {recording && (
                       <div className="flex items-center gap-2 text-red-400 text-sm font-medium">
                         <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
@@ -299,7 +290,7 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
                         : <Mic className="w-7 h-7 text-white" />
                       }
                     </button>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-muted text-xs">
                       {recording ? 'Click to stop recording' : 'Click the mic to start recording'}
                     </p>
                   </>
@@ -310,13 +301,13 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
                         <Check className="w-5 h-5 text-violet-400" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-white text-sm font-medium">Recording ready</p>
-                        <p className="text-gray-500 text-xs">{fmt(recordSeconds)} recorded</p>
+                        <p className="text-text text-sm font-medium">Recording ready</p>
+                        <p className="text-muted text-xs">{fmt(recordSeconds)} recorded</p>
                       </div>
                       <button
                         type="button"
                         onClick={clearRecording}
-                        className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition"
+                        className="p-1.5 rounded-lg text-muted hover:text-red-400 hover:bg-red-900/20 transition"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -330,7 +321,6 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
             </div>
           )}
 
-          {/* Status / error */}
           {isLoading && (
             <div className="mt-4 flex items-center gap-2 text-sm text-emerald-300 bg-emerald-900/20 border border-emerald-900/40 rounded-lg px-4 py-2.5">
               <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
@@ -348,7 +338,6 @@ export default function MediaReferenceInput({ userId, onJobCreated }: Props) {
             </div>
           )}
 
-          {/* Submit */}
           <button
             type="button"
             disabled={isLoading || (mode === 'upload' ? !selectedFile : !recordedBlob)}

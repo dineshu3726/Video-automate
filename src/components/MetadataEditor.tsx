@@ -45,41 +45,38 @@ export default function MetadataEditor({ initial, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+      <h3 className="text-sm font-semibold text-text flex items-center gap-2">
         <Tag className="w-4 h-4" /> Metadata
       </h3>
 
-      {/* Title */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Title</label>
+        <label className="text-xs text-muted mb-1 block">Title</label>
         <input
           type="text"
           value={title}
           maxLength={100}
           onChange={(e) => { setTitle(e.target.value); emit({ title: e.target.value }) }}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition"
+          className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm placeholder-muted focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition"
           placeholder="Video title…"
         />
-        <p className="text-right text-xs text-gray-600 mt-1">{title.length}/100</p>
+        <p className="text-right text-xs text-muted/50 mt-1">{title.length}/100</p>
       </div>
 
-      {/* Description */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Description</label>
+        <label className="text-xs text-muted mb-1 block">Description</label>
         <textarea
           value={description}
           maxLength={300}
           rows={3}
           onChange={(e) => { setDescription(e.target.value); emit({ description: e.target.value }) }}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition resize-none"
+          className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm placeholder-muted focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition resize-none"
           placeholder="Caption / description…"
         />
-        <p className="text-right text-xs text-gray-600 mt-1">{description.length}/300</p>
+        <p className="text-right text-xs text-muted/50 mt-1">{description.length}/300</p>
       </div>
 
-      {/* Tags */}
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Hashtags</label>
+        <label className="text-xs text-muted mb-1 block">Hashtags</label>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {tags.map((tag) => (
             <span
@@ -98,14 +95,14 @@ export default function MetadataEditor({ initial, onChange }: Props) {
           ))}
         </div>
         <div className="relative">
-          <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+          <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
           <input
             type="text"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleTagKeyDown}
             placeholder="Add tag, press Enter…"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition"
+            className="w-full bg-surface2 border border-border rounded-lg pl-8 pr-3 py-2 text-text text-sm placeholder-muted focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition"
           />
         </div>
       </div>

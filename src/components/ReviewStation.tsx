@@ -70,7 +70,6 @@ export default function ReviewStation({ job }: Props) {
       return
     }
 
-    // Navigate back to dashboard after a brief success flash
     setTimeout(() => router.push('/dashboard'), 800)
   }
 
@@ -93,35 +92,35 @@ export default function ReviewStation({ job }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-text">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
+            className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Dashboard
           </button>
-          <div className="h-4 w-px bg-gray-700" />
+          <div className="h-4 w-px bg-border" />
           <div className="flex-1 min-w-0">
-            <p className="text-white font-medium text-sm truncate">
+            <p className="text-text font-medium text-sm truncate">
               {metadata.title || job.category}
             </p>
-            <p className="text-gray-500 text-xs">{job.category}</p>
+            <p className="text-muted text-xs">{job.category}</p>
           </div>
-          <span className="text-xs font-mono text-gray-700">{job.id.slice(0, 8)}…</span>
+          <span className="text-xs font-mono text-muted/50">{job.id.slice(0, 8)}…</span>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-          {/* ── Left: 9:16 video player ── */}
+          {/* Left: 9:16 video player */}
           <div className="flex-shrink-0 w-full lg:w-auto flex flex-col items-center gap-4">
             <div
-              className="relative bg-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl"
+              className="relative bg-black rounded-2xl overflow-hidden border border-border shadow-2xl"
               style={{ width: '270px', aspectRatio: '9/16' }}
             >
               {job.video_url ? (
@@ -135,7 +134,6 @@ export default function ReviewStation({ job }: Props) {
                     onClick={togglePlay}
                     playsInline
                   />
-                  {/* Overlay controls */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
                     <button
                       onClick={togglePlay}
@@ -147,7 +145,6 @@ export default function ReviewStation({ job }: Props) {
                       }
                     </button>
                   </div>
-                  {/* Bottom controls */}
                   <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-end gap-2 bg-gradient-to-t from-black/60 to-transparent">
                     <button
                       onClick={restart}
@@ -168,7 +165,7 @@ export default function ReviewStation({ job }: Props) {
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-gray-600 text-sm text-center px-4">No video available</p>
+                  <p className="text-muted/50 text-sm text-center px-4">No video available</p>
                 </div>
               )}
             </div>
@@ -209,11 +206,11 @@ export default function ReviewStation({ job }: Props) {
 
             {/* Regenerate dropdown */}
             <div className="relative w-full" style={{ maxWidth: '270px' }}>
-              <div className="flex rounded-xl overflow-hidden border border-gray-700">
+              <div className="flex rounded-xl overflow-hidden border border-border">
                 <button
                   onClick={() => handleRegenerate('video')}
                   disabled={loading || regenerating}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-surface2 hover:bg-surface text-muted hover:text-text text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {regenerating
                     ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -224,27 +221,27 @@ export default function ReviewStation({ job }: Props) {
                 <button
                   onClick={() => setShowRegenMenu(!showRegenMenu)}
                   disabled={loading || regenerating}
-                  className="px-2.5 bg-gray-800 hover:bg-gray-700 border-l border-gray-700 text-gray-400 hover:text-white transition disabled:opacity-50"
+                  className="px-2.5 bg-surface2 hover:bg-surface border-l border-border text-muted hover:text-text transition disabled:opacity-50"
                 >
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
               </div>
               {showRegenMenu && (
-                <div className="absolute bottom-full mb-1 left-0 right-0 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-xl z-10">
+                <div className="absolute bottom-full mb-1 left-0 right-0 bg-surface2 border border-border rounded-xl overflow-hidden shadow-xl z-10">
                   <button
                     onClick={() => handleRegenerate('video')}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                    className="w-full text-left px-4 py-3 text-sm text-muted hover:bg-surface hover:text-text transition"
                   >
                     <p className="font-medium">Regenerate Video Only</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Keep script, fetch new visuals & sound</p>
+                    <p className="text-xs text-muted/60 mt-0.5">Keep script, fetch new visuals & sound</p>
                   </button>
-                  <div className="border-t border-gray-700" />
+                  <div className="border-t border-border" />
                   <button
                     onClick={() => handleRegenerate('all')}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                    className="w-full text-left px-4 py-3 text-sm text-muted hover:bg-surface hover:text-text transition"
                   >
                     <p className="font-medium">Regenerate Everything</p>
-                    <p className="text-xs text-gray-500 mt-0.5">New script, new visuals & sound</p>
+                    <p className="text-xs text-muted/60 mt-0.5">New script, new visuals & sound</p>
                   </button>
                 </div>
               )}
@@ -257,29 +254,27 @@ export default function ReviewStation({ job }: Props) {
             )}
           </div>
 
-          {/* ── Right: Metadata + Script ── */}
+          {/* Right: Metadata + Script */}
           <div className="flex-1 min-w-0 space-y-6">
-            {/* Metadata editor */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-surface border border-border rounded-2xl p-6">
               <MetadataEditor initial={metadata} onChange={setMetadata} />
             </div>
 
-            {/* Script accordion */}
             {job.script && (
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setShowScript(!showScript)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-sm font-medium text-gray-300 hover:text-white transition"
+                  className="w-full flex items-center justify-between px-6 py-4 text-sm font-medium text-muted hover:text-text transition"
                 >
                   <span className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     View Script
                   </span>
-                  <span className="text-gray-600 text-xs">{showScript ? '▲' : '▼'}</span>
+                  <span className="text-muted/50 text-xs">{showScript ? '▲' : '▼'}</span>
                 </button>
                 {showScript && (
-                  <div className="px-6 pb-6 border-t border-gray-800">
-                    <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap mt-4">
+                  <div className="px-6 pb-6 border-t border-border">
+                    <p className="text-muted text-sm leading-relaxed whitespace-pre-wrap mt-4">
                       {job.script}
                     </p>
                   </div>

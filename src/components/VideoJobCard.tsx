@@ -9,7 +9,7 @@ const STATUS_CONFIG: Record<
   VideoStatus,
   { label: string; color: string; bg: string; icon: React.ReactNode }
 > = {
-  pending:    { label: 'Pending',    color: 'text-gray-400',    bg: 'bg-gray-800',     icon: <Clock className="w-3.5 h-3.5" /> },
+  pending:    { label: 'Pending',    color: 'text-muted',       bg: 'bg-surface2',     icon: <Clock className="w-3.5 h-3.5" /> },
   scripting:  { label: 'Scripting',  color: 'text-blue-400',    bg: 'bg-blue-900/40',  icon: <Loader2 className="w-3.5 h-3.5 animate-spin" /> },
   generating: { label: 'Generating', color: 'text-violet-400',  bg: 'bg-violet-900/40',icon: <Loader2 className="w-3.5 h-3.5 animate-spin" /> },
   processing: { label: 'Processing', color: 'text-yellow-400',  bg: 'bg-yellow-900/40',icon: <Loader2 className="w-3.5 h-3.5 animate-spin" /> },
@@ -37,25 +37,25 @@ function CardInner({ job, onDelete }: { job: VideoJob; onDelete?: (id: string) =
 
   return (
     <div
-      className={`bg-gray-900 border rounded-xl p-4 flex items-start gap-4 transition ${
+      className={`bg-surface border rounded-xl p-4 flex items-start gap-4 transition ${
         job.status === 'review'
           ? 'border-orange-900/60 hover:border-orange-700/80 cursor-pointer'
           : job.status === 'approved'
           ? 'border-green-900/60 hover:border-green-700/80 cursor-pointer'
-          : 'border-gray-800 hover:border-gray-700'
+          : 'border-border hover:border-muted/40'
       }`}
     >
       {/* Icon */}
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-        job.status === 'review' ? 'bg-orange-900/30' : 'bg-gray-800'
+        job.status === 'review' ? 'bg-orange-900/30' : 'bg-surface2'
       }`}>
-        <Film className={`w-5 h-5 ${job.status === 'review' ? 'text-orange-500' : 'text-gray-500'}`} />
+        <Film className={`w-5 h-5 ${job.status === 'review' ? 'text-orange-500' : 'text-muted'}`} />
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-white font-medium text-sm truncate">{job.category}</p>
+          <p className="text-text font-medium text-sm truncate">{job.category}</p>
           <div className="flex items-center gap-2 flex-shrink-0">
             <span
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}
@@ -66,7 +66,7 @@ function CardInner({ job, onDelete }: { job: VideoJob; onDelete?: (id: string) =
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="p-1.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-900/20 transition disabled:opacity-40"
+              className="p-1.5 rounded-lg text-muted/50 hover:text-red-400 hover:bg-red-900/20 transition disabled:opacity-40"
               title="Delete job"
             >
               {deleting
@@ -77,13 +77,13 @@ function CardInner({ job, onDelete }: { job: VideoJob; onDelete?: (id: string) =
           </div>
         </div>
         {job.metadata?.title && (
-          <p className="text-gray-400 text-xs mt-1 truncate">{job.metadata.title}</p>
+          <p className="text-muted text-xs mt-1 truncate">{job.metadata.title}</p>
         )}
         {job.status === 'failed' && job.metadata?.error && (
           <p className="text-red-400 text-xs mt-1 truncate">{job.metadata.error}</p>
         )}
         <div className="flex items-center justify-between mt-1.5">
-          <p className="text-gray-600 text-xs">{date}</p>
+          <p className="text-muted/60 text-xs">{date}</p>
           {job.status === 'review' && (
             <span className="text-orange-400 text-xs flex items-center gap-1 font-medium">
               Review now <ArrowRight className="w-3 h-3" />

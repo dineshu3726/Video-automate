@@ -53,11 +53,11 @@ export default function GenerationStatus({ status, jobId }: Props) {
   if (!['scripting', 'generating', 'processing'].includes(status)) return null
 
   return (
-    <div className="bg-gray-900 border border-violet-900/50 rounded-2xl p-5">
+    <div className="bg-surface border border-violet-900/50 rounded-2xl p-5">
       <div className="flex items-center gap-2 mb-4">
         <Loader2 className="w-4 h-4 text-violet-400 animate-spin" />
         <span className="text-sm font-medium text-violet-300">Pipeline running</span>
-        <span className="text-xs text-gray-600 ml-auto font-mono">{jobId.slice(0, 8)}…</span>
+        <span className="text-xs text-muted/50 ml-auto font-mono">{jobId.slice(0, 8)}…</span>
       </div>
 
       <div className="space-y-3">
@@ -65,14 +65,13 @@ export default function GenerationStatus({ status, jobId }: Props) {
           const state = getStepState(step.status, status)
           return (
             <div key={step.status} className="flex items-start gap-3">
-              {/* Step indicator */}
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
                   state === 'complete'
                     ? 'bg-green-600'
                     : state === 'active'
                     ? 'bg-violet-600 ring-2 ring-violet-400/30'
-                    : 'bg-gray-800 border border-gray-700'
+                    : 'bg-surface2 border border-border'
                 }`}
               >
                 {state === 'complete' ? (
@@ -80,26 +79,25 @@ export default function GenerationStatus({ status, jobId }: Props) {
                 ) : state === 'active' ? (
                   <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
                 ) : (
-                  <Clock className="w-3.5 h-3.5 text-gray-600" />
+                  <Clock className="w-3.5 h-3.5 text-muted/50" />
                 )}
               </div>
 
-              {/* Step text */}
               <div className="flex-1 min-w-0">
                 <p
                   className={`text-sm font-medium ${
                     state === 'complete'
                       ? 'text-green-400'
                       : state === 'active'
-                      ? 'text-white'
-                      : 'text-gray-600'
+                      ? 'text-text'
+                      : 'text-muted/50'
                   }`}
                 >
                   {step.label}
                 </p>
                 <p
                   className={`text-xs mt-0.5 ${
-                    state === 'active' ? 'text-gray-400' : 'text-gray-700'
+                    state === 'active' ? 'text-muted' : 'text-muted/40'
                   }`}
                 >
                   {step.description}

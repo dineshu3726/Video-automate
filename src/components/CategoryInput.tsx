@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Sparkles, Loader2, ChevronDown, AlertCircle } from 'lucide-react'
 
 const CATEGORY_SUGGESTIONS = [
-  // 💰 High-monetization categories
   'Motivational Quotes & Success',
   'Mind-Blowing Facts',
   'Psychology & Human Behavior',
@@ -16,7 +15,6 @@ const CATEGORY_SUGGESTIONS = [
   'True Crime & Mysteries',
   'Science Facts That Shock You',
   'Relationship & Dating Advice',
-  // 🎯 Niche content
   'Tech & Gadgets',
   'Finance & Investing',
   'Fitness & Health',
@@ -60,7 +58,6 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
 
     setError(null)
 
-    // Step 1 – create the job row (status: pending)
     setStage('creating')
     const { data: job, error: insertError } = await supabase
       .from('video_jobs')
@@ -74,10 +71,8 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
       return
     }
 
-    // Optimistically refresh so the card appears immediately
     onJobCreated()
 
-    // Step 2 – call the Gemini generation API
     setStage('scripting')
     const res = await fetch('/api/generate', {
       method: 'POST',
@@ -89,7 +84,7 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
       const body = await res.json().catch(() => ({}))
       setError(body.error ?? 'Generation failed')
       setStage('error')
-      onJobCreated() // refresh so card shows reverted 'pending' status
+      onJobCreated()
       return
     }
 
@@ -97,14 +92,13 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
     setCategory('')
     onJobCreated()
 
-    // Reset to idle after a brief success moment
     setTimeout(() => setStage('idle'), 2000)
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-white mb-1">Generate a New Video</h2>
-      <p className="text-gray-400 text-sm mb-5">
+    <div className="bg-surface border border-border rounded-2xl p-6">
+      <h2 className="text-lg font-semibold text-text mb-1">Generate a New Video</h2>
+      <p className="text-muted text-sm mb-5">
         Enter a niche or topic — Gemini will script it, then Pexels + FFmpeg will render the video.
       </p>
 
@@ -118,12 +112,12 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             disabled={isLoading}
             placeholder="e.g. AI & Future Tech, Fitness Tips, Investing 101…"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition pr-10 disabled:opacity-50"
+            className="w-full bg-surface2 border border-border rounded-xl px-4 py-3 text-text placeholder-muted text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition pr-10 disabled:opacity-50"
           />
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
 
           {showSuggestions && !isLoading && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden z-10 shadow-xl">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-surface2 border border-border rounded-xl overflow-hidden z-10 shadow-xl">
               {CATEGORY_SUGGESTIONS.filter((s) =>
                 s.toLowerCase().includes(category.toLowerCase())
               ).map((suggestion) => (
@@ -131,7 +125,7 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
                   key={suggestion}
                   type="button"
                   onMouseDown={() => setCategory(suggestion)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition"
+                  className="w-full text-left px-4 py-2.5 text-sm text-muted hover:bg-surface hover:text-text transition"
                 >
                   {suggestion}
                 </button>
@@ -140,7 +134,6 @@ export default function CategoryInput({ userId, onJobCreated }: Props) {
           )}
         </div>
 
-        {/* Progress indicator */}
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-violet-300 bg-violet-900/20 border border-violet-900/40 rounded-lg px-4 py-2.5">
             <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />

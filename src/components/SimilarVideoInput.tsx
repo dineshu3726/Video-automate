@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Link2, Loader2, AlertCircle, Youtube, Instagram } from 'lucide-react'
 
-// Detect platform from URL for badge display
 function detectPlatform(url: string): { label: string; color: string } | null {
   if (url.includes('youtube.com') || url.includes('youtu.be'))
     return { label: 'YouTube', color: 'text-red-400' }
@@ -45,7 +44,6 @@ export default function SimilarVideoInput({ userId, onJobCreated }: Props) {
     setError(null)
     setStage('creating')
 
-    // Derive a category label from the URL
     const category = platform
       ? `Similar to ${platform.label} video`
       : 'Similar to reference video'
@@ -86,27 +84,26 @@ export default function SimilarVideoInput({ userId, onJobCreated }: Props) {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-      {/* Collapsed toggle */}
+    <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-6 py-4 text-sm hover:bg-gray-800/50 transition"
+        className="w-full flex items-center justify-between px-6 py-4 text-sm hover:bg-surface2/50 transition"
       >
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-indigo-600/20 rounded-lg flex items-center justify-center">
             <Link2 className="w-3.5 h-3.5 text-indigo-400" />
           </div>
           <div className="text-left">
-            <p className="text-white font-medium text-sm">Generate Similar Video</p>
-            <p className="text-gray-500 text-xs">Paste a YouTube, Instagram, or Pinterest URL</p>
+            <p className="text-text font-medium text-sm">Generate Similar Video</p>
+            <p className="text-muted text-xs">Paste a YouTube, Instagram, or Pinterest URL</p>
           </div>
         </div>
-        <span className="text-gray-600 text-xs">{open ? '▲' : '▼'}</span>
+        <span className="text-muted/50 text-xs">{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
-        <div className="px-6 pb-6 border-t border-gray-800">
+        <div className="px-6 pb-6 border-t border-border">
           <div className="flex gap-2 mt-4 mb-4">
             {[
               { icon: <Youtube className="w-3.5 h-3.5" />, label: 'YouTube', color: 'text-red-400 border-red-900/40 bg-red-900/10' },
@@ -127,7 +124,7 @@ export default function SimilarVideoInput({ userId, onJobCreated }: Props) {
                 onChange={(e) => { setUrl(e.target.value); setError(null); setStage('idle') }}
                 disabled={isLoading}
                 placeholder="https://www.youtube.com/shorts/..."
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition pr-24 disabled:opacity-50"
+                className="w-full bg-surface2 border border-border rounded-xl px-4 py-3 text-text placeholder-muted text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition pr-24 disabled:opacity-50"
               />
               {platform && (
                 <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium ${platform.color}`}>

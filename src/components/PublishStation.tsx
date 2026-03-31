@@ -67,18 +67,18 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
   ]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-text">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/60 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
+            className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
           >
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </button>
-          <div className="h-4 w-px bg-gray-700" />
-          <p className="text-white font-medium text-sm truncate">
+          <div className="h-4 w-px bg-border" />
+          <p className="text-text font-medium text-sm truncate">
             {job.metadata?.title ?? job.category}
           </p>
         </div>
@@ -86,16 +86,16 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
 
       <main className="max-w-2xl mx-auto px-4 py-10 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Publish Video</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-text">Publish Video</h1>
+          <p className="text-muted text-sm mt-1">
             Select where to post this approved Short/Reel.
           </p>
         </div>
 
         {/* Video summary */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-2">
-          <p className="text-white font-medium">{job.metadata?.title ?? job.category}</p>
-          <p className="text-gray-400 text-sm">{job.metadata?.description}</p>
+        <div className="bg-surface border border-border rounded-2xl p-5 space-y-2">
+          <p className="text-text font-medium">{job.metadata?.title ?? job.category}</p>
+          <p className="text-muted text-sm">{job.metadata?.description}</p>
           {(job.metadata?.tags ?? []).length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1">
               {job.metadata!.tags!.map((t) => (
@@ -109,7 +109,7 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
 
         {/* Platform selector */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-300">Choose platforms</h2>
+          <h2 className="text-sm font-semibold text-muted">Choose platforms</h2>
           {platforms.map(({ id, label, icon, connected }) => {
             const alreadyPublished = !!existingUrls[id]
             const isSelected = selected.has(id)
@@ -126,16 +126,16 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
                     : isSelected
                     ? 'border-violet-500 bg-violet-900/20'
                     : connected
-                    ? 'border-gray-700 bg-gray-900 hover:border-gray-600'
-                    : 'border-gray-800 bg-gray-900/50 opacity-50 cursor-not-allowed'
+                    ? 'border-border bg-surface hover:border-muted/40'
+                    : 'border-border bg-surface/50 opacity-50 cursor-not-allowed'
                 }`}
               >
-                <div className={`${alreadyPublished ? 'text-green-400' : isSelected ? 'text-violet-400' : 'text-gray-500'}`}>
+                <div className={`${alreadyPublished ? 'text-green-400' : isSelected ? 'text-violet-400' : 'text-muted'}`}>
                   {icon}
                 </div>
                 <div className="flex-1">
-                  <p className="text-white text-sm font-medium">{label}</p>
-                  <p className="text-xs mt-0.5 text-gray-500">
+                  <p className="text-text text-sm font-medium">{label}</p>
+                  <p className="text-xs mt-0.5 text-muted">
                     {alreadyPublished
                       ? 'Already published'
                       : !connected
@@ -154,7 +154,7 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
           })}
 
           {(!ytConnected || !igConnected) && (
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted/50">
               Connect missing platforms in{' '}
               <a href="/dashboard/settings" className="text-violet-400 hover:underline">
                 Settings
@@ -178,9 +178,9 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
                 <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-green-300 text-sm font-medium capitalize">{platform} — Published!</p>
-                  <p className="text-gray-500 text-xs truncate">{url}</p>
+                  <p className="text-muted text-xs truncate">{url}</p>
                 </div>
-                <ExternalLink className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <ExternalLink className="w-4 h-4 text-muted flex-shrink-0" />
               </a>
             ))}
 
@@ -192,7 +192,7 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
                 <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-red-300 text-sm font-medium capitalize">{platform} failed</p>
-                  <p className="text-gray-500 text-xs mt-0.5">{msg}</p>
+                  <p className="text-muted text-xs mt-0.5">{msg}</p>
                 </div>
               </div>
             ))}
@@ -212,7 +212,7 @@ export default function PublishStation({ job, ytConnected, igConnected }: Props)
         ) : (
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3.5 rounded-xl transition"
+            className="w-full flex items-center justify-center gap-2 bg-surface2 hover:bg-surface text-text font-medium py-3.5 rounded-xl transition"
           >
             Back to Dashboard
           </button>
