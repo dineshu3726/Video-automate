@@ -6,6 +6,11 @@ import { join } from 'path'
 
 export const maxDuration = 60
 
+function getProxyArgs(): string[] {
+  const proxy = process.env.YTDLP_PROXY
+  return proxy ? ['--proxy', proxy] : []
+}
+
 function getCookieArgs(): string[] {
   const cookies = process.env.YOUTUBE_COOKIES
   if (!cookies) return []
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
       '--no-check-certificates',
       '--no-warnings',
       '--extractor-args', 'youtube:player_client=android,ios,web',
+      ...getProxyArgs(),
       ...getCookieArgs(),
     ])
 

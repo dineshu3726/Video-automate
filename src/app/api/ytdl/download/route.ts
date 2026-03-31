@@ -6,6 +6,11 @@ import { randomUUID } from 'crypto'
 
 export const maxDuration = 120
 
+function getProxyArgs(): string[] {
+  const proxy = process.env.YTDLP_PROXY
+  return proxy ? ['--proxy', proxy] : []
+}
+
 function getCookieArgs(): string[] {
   const cookies = process.env.YOUTUBE_COOKIES
   if (!cookies) return []
@@ -82,6 +87,7 @@ export async function GET(request: Request) {
         '--no-check-certificates',
         '--no-warnings',
         ...EXTRACTOR_ARGS,
+        ...getProxyArgs(),
         ...getCookieArgs(),
       ]),
       getVideoTitle(url),
