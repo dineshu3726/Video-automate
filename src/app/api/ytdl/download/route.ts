@@ -1,46 +1,59 @@
-import ytdl from '@distube/ytdl-core'
+import youtubeDl from 'youtube-dl-exec'
+
+export const maxDuration = 60
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const url = searchParams.get('url')
-  const itag = searchParams.get('itag')
+  const formatId = searchParams.get('itag')
 
-  if (!url || !ytdl.validateURL(url)) {
+  if (!url || (!url.includes('youtube.com') && !url.includes('youtu.be'))) {
     return new Response('Invalid YouTube URL', { status: 400 })
   }
 
   try {
-    const info = await ytdl.getInfo(url)
-    const format = itag
-      ? ytdl.chooseFormat(info.formats, { quality: parseInt(itag) })
-      : ytdl.chooseFormat(info.formats, { quality: 'highestvideo', filter: 'audioandvideo' })
+    // Get the direct CDN URL for this format from yt-dlp
+    const directUrl = await youtubeDl(url, {
+      getUrl: true,
+      format: formatId ?? 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+      noCheckCertificates: true,
+      noWarnings: true,
+      addHeader: ['referer:youtube.com', 'user-agent:Mozilla/5.0'],
+    }) as string
 
-    const safeTitle = info.videoDetails.title
+    // Get a clean filename from the video title
+    const infoRaw = await youtubeDl(url, {
+      dumpSingleJson: true,
+      noCheckCertificates: true,
+      noWarnings: true,
+      skipDownload: true,
+    }) as Record<string, unknown>
+
+    const safeTitle = String(infoRaw.title ?? 'video')
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '_')
       .slice(0, 60)
 
-    const ext = format.container ?? 'mp4'
+    const ext = String(infoRaw.ext ?? 'mp4')
     const filename = `${safeTitle}.${ext}`
-    const mimeType = format.mimeType?.split(';')[0] ?? 'video/mp4'
 
-    // Stream the video directly from YouTube → browser
-    const stream = ytdl.downloadFromInfo(info, { format })
-
-    const readable = new ReadableStream({
-      start(controller) {
-        stream.on('data', (chunk: Buffer) => controller.enqueue(chunk))
-        stream.on('end', () => controller.close())
-        stream.on('error', (err: Error) => controller.error(err))
-      },
-      cancel() {
-        stream.destroy()
+    // Proxy the stream through our server so we can set Content-Disposition
+    const upstream = await fetch(directUrl.trim(), {
+      headers: {
+        'Referer': 'https://www.youtube.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     })
 
-    return new Response(readable, {
+    if (!upstream.ok) {
+      return new Response('Failed to fetch video stream', { status: 502 })
+    }
+
+    const contentType = upstream.headers.get('Content-Type') ?? 'video/mp4'
+
+    return new Response(upstream.body, {
       headers: {
-        'Content-Type': mimeType,
+        'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Transfer-Encoding': 'chunked',
       },

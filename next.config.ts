@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['fluent-ffmpeg', '@ffmpeg-installer/ffmpeg', '@distube/ytdl-core'],
+  serverExternalPackages: ['fluent-ffmpeg', '@ffmpeg-installer/ffmpeg', '@distube/ytdl-core', 'youtube-dl-exec'],
 };
 
 export default nextConfig;

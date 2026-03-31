@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 interface VideoFormat {
-  itag: number
+  itag: string
   quality: string
   label: string
   container: string
@@ -50,7 +50,7 @@ export default function DownloaderPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<VideoInfo | null>(null)
-  const [downloading, setDownloading] = useState<number | null>(null)
+  const [downloading, setDownloading] = useState<string | null>(null)
 
   async function handleFetch(e: React.FormEvent) {
     e.preventDefault()
