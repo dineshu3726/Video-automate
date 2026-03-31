@@ -29,8 +29,17 @@ export default function AccountSettings({
   const [time, setTime] = useState(initialTime.slice(0, 5))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [disconnecting, setDisconnecting] = useState<string | null>(null)
 
   const supabase = createClient()
+
+  async function disconnectPlatform(platform: 'youtube' | 'instagram') {
+    setDisconnecting(platform)
+    const field = platform === 'youtube' ? 'yt_token' : 'ig_token'
+    await supabase.from('profiles').update({ [field]: null }).eq('id', userId)
+    setDisconnecting(null)
+    window.location.reload()
+  }
 
   async function saveSchedule() {
     setSaving(true)
@@ -131,9 +140,24 @@ export default function AccountSettings({
                   <p className="text-muted text-xs">{p.sublabel}</p>
                 </div>
                 {p.connected ? (
-                  <div className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Connected
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Connected
+                    </div>
+                    <button
+                      onClick={() => disconnectPlatform(p.id as 'youtube' | 'instagram')}
+                      disabled={disconnecting === p.id}
+                      className="text-xs text-muted hover:text-red-400 border border-border hover:border-red-400/40 px-2.5 py-1.5 rounded-lg transition disabled:opacity-50"
+                    >
+                      {disconnecting === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Disconnect'}
+                    </button>
+                    <a
+                      href={p.connectHref}
+                      className="text-xs font-medium bg-surface2 hover:bg-surface border border-border text-text px-2.5 py-1.5 rounded-lg transition"
+                    >
+                      Reconnect
+                    </a>
                   </div>
                 ) : (
                   <a
