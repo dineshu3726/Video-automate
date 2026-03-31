@@ -17,7 +17,7 @@ function getCookieArgs(): string[] {
   }
 }
 
-const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=android,web']
+const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=ios,android,web']
 
 function getDirectUrl(videoUrl: string, formatId: string): Promise<string> {
   return new Promise((resolve, reject) => {

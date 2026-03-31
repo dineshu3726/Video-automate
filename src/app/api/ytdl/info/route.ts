@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       '--no-check-certificates',
       '--no-warnings',
       '--prefer-free-formats',
-      '--extractor-args', 'youtube:player_client=android,web',
+      '--extractor-args', 'youtube:player_client=ios,android,web',
       '--add-header', 'referer:youtube.com',
       '--add-header', 'user-agent:Mozilla/5.0',
       ...getCookieArgs(),
