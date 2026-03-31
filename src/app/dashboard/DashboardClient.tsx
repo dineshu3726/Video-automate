@@ -11,7 +11,7 @@ import MediaReferenceInput from '@/components/MediaReferenceInput'
 import VideoJobCard from '@/components/VideoJobCard'
 import GenerationStatus from '@/components/GenerationStatus'
 import VeoPoller from '@/components/VeoPoller'
-import { Video, LogOut, LayoutGrid, Clock, CheckCircle2, Settings } from 'lucide-react'
+import { Video, LogOut, LayoutGrid, Clock, CheckCircle2, Settings, Youtube } from 'lucide-react'
 
 interface Props {
   user: User
@@ -96,6 +96,13 @@ export default function DashboardClient({ user, initialJobs }: Props) {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-gray-400 text-sm hidden sm:block">{user.email}</span>
+            <Link
+              href="/dashboard/downloader"
+              className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
+            >
+              <Youtube className="w-4 h-4" />
+              <span className="hidden sm:inline">Downloader</span>
+            </Link>
             <Link
               href="/dashboard/settings"
               className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition"
