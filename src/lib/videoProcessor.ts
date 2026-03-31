@@ -101,7 +101,7 @@ async function generateVoice(script: string, workDir: string): Promise<string | 
     const buffers: Buffer[] = []
     for (const chunk of chunks) {
       try {
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=en&client=tw-ob&ttsspeed=0.9`
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=hi&client=tw-ob&ttsspeed=0.9`
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), 5_000)
         const res = await fetch(url, {

@@ -10,10 +10,11 @@ export interface GeneratedContent {
   tags: string[]
 }
 
-const SYSTEM_PROMPT = `You are an expert short-form video content creator specializing in monetizable YouTube Shorts and Instagram Reels.
+const SYSTEM_PROMPT = `You are an expert short-form video content creator specializing in monetizable YouTube Shorts and Instagram Reels for Indian audiences.
 Your outputs must be optimized for maximum watch time, virality, and ad revenue potential in a 30–60 second vertical video format.
 Use proven hooks like shocking facts, open loops, controversial opinions, or emotional triggers to maximize retention.
-Write scripts that feel human, relatable, and keep viewers watching till the last second.`
+Write narration scripts in natural Hinglish — fluent Hindi sentences mixed with common English words exactly as spoken by popular Indian creators and influencers. The script must sound like a confident, energetic Indian narrator speaking naturally.
+Keep title, description, and tags in English for SEO purposes.`
 
 const SIMILAR_VIDEO_PROMPT = (url: string) => `${SYSTEM_PROMPT}
 
@@ -23,7 +24,7 @@ Analyze the video's style, tone, pacing, topic, and hook technique. Then generat
 
 Return ONLY a valid JSON object with these exact keys:
 {
-  "script": "A punchy, hook-first narration script (150–200 words) inspired by the reference video's style. Start with a bold hook. Use short, snappy sentences. End with a CTA like 'Follow for more!'.",
+  "script": "A punchy, hook-first narration script (150–200 words) inspired by the reference video's style, written in natural Hinglish — fluent Hindi with common English words mixed in, exactly like popular Indian YouTube creators speak. Start with a bold Hindi hook. Use short, energetic sentences. End with a Hindi CTA like 'Follow karo aur aisi videos ke liye!'.",
   "veoPrompt": "A highly detailed video generation prompt for Google Veo inspired by the visual style of the reference video. Describe: visual style, subjects, camera angles, color palette, lighting, motion, background, mood. 80–120 words.",
   "title": "An SEO-optimized YouTube Short title under 60 characters. Include an emoji.",
   "description": "A YouTube/Instagram description under 150 characters with a call to action.",
@@ -68,7 +69,7 @@ Generate content for a YouTube Short / Instagram Reel in the niche: "${category}
 
 Return ONLY a valid JSON object with these exact keys:
 {
-  "script": "A punchy, hook-first narration script (150–200 words). Start with a bold hook sentence. Use short, snappy sentences. End with a strong CTA like 'Follow for more!'.",
+  "script": "A punchy, hook-first narration script (150–200 words) written in natural Hinglish — fluent Hindi with common English words mixed in, exactly like popular Indian YouTube creators speak. Start with a bold Hindi hook. Use short, energetic sentences. End with a Hindi CTA like 'Follow karo aur aisi videos ke liye!'.",
   "veoPrompt": "A highly detailed video generation prompt for Google Veo. Describe: visual style (cinematic, minimalist, etc.), subjects, camera angles (close-up, drone, etc.), color palette, lighting, motion, background, and mood. Be extremely specific and visual. 80–120 words.",
   "title": "An SEO-optimized YouTube Short title under 60 characters. Include an emoji.",
   "description": "A YouTube/Instagram description under 150 characters with a call to action.",
