@@ -2,14 +2,14 @@
 
 :root {
   --bg: #ffffff;
-  --bg-surface: #f3f4f6;
-  --bg-surface2: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
+  --bg-surface: #f0f4ff;
+  --bg-surface2: #dde8ff;
+  --text: #1e293b;
+  --text-muted: #64748b;
   --primary: #2563EB;
   --primary-hover: #1d4ed8;
-  --accent: #EAB308;
-  --border: #e5e7eb;
+  --accent: #FB923C;
+  --border: #e2e8f0;
 }
 
 .dark {

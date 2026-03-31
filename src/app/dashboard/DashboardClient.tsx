@@ -5,22 +5,50 @@ import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { VideoJob } from '@/types'
 import Link from 'next/link'
-import CategoryInput from '@/components/CategoryInput'
-import SimilarVideoInput from '@/components/SimilarVideoInput'
-import MediaReferenceInput from '@/components/MediaReferenceInput'
-import VideoJobCard from '@/components/VideoJobCard'
-import GenerationStatus from '@/components/GenerationStatus'
+import FeedTab from '@/components/tabs/FeedTab'
+import StudioTab from '@/components/tabs/StudioTab'
+import DownloaderTab from '@/components/tabs/DownloaderTab'
+import ShortsPlayer from '@/components/feed/ShortsPlayer'
 import VeoPoller from '@/components/VeoPoller'
 import ThemeToggle from '@/components/ThemeToggle'
-import { Video, LogOut, LayoutGrid, Clock, CheckCircle2, Settings, Youtube } from 'lucide-react'
+import {
+  Video,
+  LogOut,
+  LayoutGrid,
+  Clock,
+  CheckCircle2,
+  Settings,
+  Youtube,
+  Play,
+  Tv,
+  Sparkles,
+  Download,
+} from 'lucide-react'
+
+type Tab = 'player' | 'feed' | 'studio' | 'downloader'
+
+interface TabDef {
+  id: Tab
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+}
+
+const TABS: TabDef[] = [
+  { id: 'player', label: 'Player', icon: Play },
+  { id: 'feed', label: 'Feed', icon: Tv },
+  { id: 'studio', label: 'Studio', icon: Sparkles },
+  { id: 'downloader', label: 'Downloader', icon: Download },
+]
 
 interface Props {
   user: User
   initialJobs: VideoJob[]
+  ytConnected: boolean
 }
 
-export default function DashboardClient({ user, initialJobs }: Props) {
+export default function DashboardClient({ user, initialJobs, ytConnected }: Props) {
   const [jobs, setJobs] = useState<VideoJob[]>(initialJobs)
+  const [activeTab, setActiveTab] = useState<Tab>('player')
   const supabase = createClient()
 
   const fetchJobs = useCallback(async () => {
@@ -33,7 +61,7 @@ export default function DashboardClient({ user, initialJobs }: Props) {
     if (data) setJobs(data as VideoJob[])
   }, [supabase, user.id])
 
-  // Real-time subscription — updates any job card the moment the DB row changes
+  // Real-time subscription
   useEffect(() => {
     const channel = supabase
       .channel('video_jobs_live')
@@ -59,7 +87,9 @@ export default function DashboardClient({ user, initialJobs }: Props) {
       )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [supabase, user.id])
 
   async function handleSignOut() {
@@ -84,13 +114,18 @@ export default function DashboardClient({ user, initialJobs }: Props) {
     approved: jobs.filter((j) => j.status === 'approved' || j.status === 'published').length,
   }
 
+  // Suppress unused variable warnings — these are used by StudioTab via props
+  void handleDeleteJob
+  void activeJobs
+  void fetchJobs
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
       <header className="border-b border-border bg-surface/50 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center">
               <Video className="w-4 h-4 text-white" />
             </div>
             <span className="text-text font-semibold">VideoForge</span>
@@ -123,66 +158,96 @@ export default function DashboardClient({ user, initialJobs }: Props) {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        {/* Page Title */}
-        <div>
-          <h1 className="text-2xl font-bold text-text">Video Pipeline</h1>
-          <p className="text-muted text-sm mt-1">
-            Generate, review, and publish AI-powered Shorts &amp; Reels
-          </p>
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Tab Bar */}
+        <div className="flex gap-1 bg-surface border border-border rounded-2xl p-1.5 mb-6">
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-white text-[#2563EB] shadow border border-[#2563EB]/20 font-semibold'
+                    : 'text-muted hover:text-text'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span className="text-xs sm:text-sm">{tab.label}</span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FB923C]" />
+                )}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Total Jobs',  value: stats.total,    icon: LayoutGrid,  color: 'text-violet-400' },
-            { label: 'In Progress', value: stats.pending,  icon: Clock,       color: 'text-yellow-400' },
-            { label: 'Approved',    value: stats.approved, icon: CheckCircle2,color: 'text-green-400'  },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="bg-surface border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className={`w-4 h-4 ${color}`} />
-                <span className="text-muted text-xs">{label}</span>
-              </div>
-              <p className="text-2xl font-bold text-text">{value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Invisible Veo orchestrator — watches for 'generating' jobs and polls Veo */}
-        <VeoPoller jobs={jobs} />
-
-        {/* Generate Input */}
-        <CategoryInput userId={user.id} onJobCreated={fetchJobs} />
-        <SimilarVideoInput userId={user.id} onJobCreated={fetchJobs} />
-        <MediaReferenceInput userId={user.id} onJobCreated={fetchJobs} />
-
-        {/* Active pipeline trackers */}
-        {activeJobs.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-base font-semibold text-text">Active Pipeline</h2>
-            {activeJobs.map((job) => (
-              <GenerationStatus key={job.id} status={job.status} jobId={job.id} />
-            ))}
+        {/* Tab Content */}
+        {activeTab === 'player' && (
+          <div className="py-2">
+            <ShortsPlayer ytConnected={ytConnected} />
           </div>
         )}
 
-        {/* Job List */}
-        <div>
-          <h2 className="text-base font-semibold text-text mb-4">Recent Jobs</h2>
-          {jobs.length === 0 ? (
-            <div className="bg-surface border border-dashed border-border rounded-xl p-10 text-center">
-              <Video className="w-8 h-8 text-muted/40 mx-auto mb-3" />
-              <p className="text-muted text-sm">No videos yet. Generate your first one above.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {jobs.map((job) => (
-                <VideoJobCard key={job.id} job={job} onDelete={handleDeleteJob} />
+        {activeTab === 'feed' && (
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <FeedTab ytConnected={ytConnected} />
+          </div>
+        )}
+
+        {activeTab === 'studio' && (
+          <>
+            {/* Stats grid — only shown in studio tab */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {[
+                {
+                  label: 'Total Jobs',
+                  value: stats.total,
+                  icon: LayoutGrid,
+                  color: 'text-violet-400',
+                },
+                {
+                  label: 'In Progress',
+                  value: stats.pending,
+                  icon: Clock,
+                  color: 'text-yellow-400',
+                },
+                {
+                  label: 'Approved',
+                  value: stats.approved,
+                  icon: CheckCircle2,
+                  color: 'text-green-400',
+                },
+              ].map(({ label, value, icon: Icon, color }) => (
+                <div
+                  key={label}
+                  className="bg-surface border border-border rounded-xl p-4"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className={`w-4 h-4 ${color}`} />
+                    <span className="text-muted text-xs">{label}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-text">{value}</p>
+                </div>
               ))}
             </div>
-          )}
-        </div>
+
+            <div className="bg-surface border border-border rounded-2xl p-6">
+              <StudioTab user={user} initialJobs={jobs} />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'downloader' && (
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <DownloaderTab />
+          </div>
+        )}
+
+        {/* Invisible Veo orchestrator -- always rendered */}
+        <VeoPoller jobs={jobs} />
       </main>
     </div>
   )

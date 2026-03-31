@@ -1,0 +1,96 @@
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+import { User } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
+import { VideoJob } from '@/types'
+import CategoryInput from '@/components/CategoryInput'
+import SimilarVideoInput from '@/components/SimilarVideoInput'
+import MediaReferenceInput from '@/components/MediaReferenceInput'
+import VideoJobCard from '@/components/VideoJobCard'
+import GenerationStatus from '@/components/GenerationStatus'
+import VeoPoller from '@/components/VeoPoller'
+import { LayoutGrid, Clock, CheckCircle2 } from 'lucide-react'
+
+interface Props {
+  user: User
+  initialJobs: VideoJob[]
+}
+
+export default function GeneratePanel({ user, initialJobs }: Props) {
+  const [jobs, setJobs] = useState<VideoJob[]>(initialJobs)
+  const supabase = createClient()
+
+  const fetchJobs = useCallback(async () => {
+    const { data } = await supabase.from('video_jobs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
+    if (data) setJobs(data as VideoJob[])
+  }, [supabase, user.id])
+
+  useEffect(() => {
+    const channel = supabase.channel('video_jobs_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'video_jobs', filter: `user_id=eq.${user.id}` }, (payload) => {
+        if (payload.eventType === 'INSERT') setJobs(prev => [payload.new as VideoJob, ...prev])
+        else if (payload.eventType === 'UPDATE') setJobs(prev => prev.map(j => j.id === payload.new.id ? payload.new as VideoJob : j))
+        else if (payload.eventType === 'DELETE') setJobs(prev => prev.filter(j => j.id !== (payload.old as VideoJob).id))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase, user.id])
+
+  async function handleDeleteJob(jobId: string) {
+    await supabase.from('video_jobs').delete().eq('id', jobId)
+  }
+
+  const activeJobs = jobs.filter(j => ['scripting', 'generating', 'processing'].includes(j.status))
+  const stats = {
+    total: jobs.length,
+    pending: jobs.filter(j => ['pending', 'scripting', 'generating', 'processing'].includes(j.status)).length,
+    approved: jobs.filter(j => j.status === 'approved' || j.status === 'published').length,
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: 'Total Jobs', value: stats.total, icon: LayoutGrid, color: 'text-primary' },
+          { label: 'In Progress', value: stats.pending, icon: Clock, color: 'text-accent' },
+          { label: 'Approved', value: stats.approved, icon: CheckCircle2, color: 'text-green-400' },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-surface border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Icon className={`w-4 h-4 ${color}`} />
+              <span className="text-muted text-xs">{label}</span>
+            </div>
+            <p className="text-2xl font-bold text-text">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <VeoPoller jobs={jobs} />
+
+      <CategoryInput userId={user.id} onJobCreated={fetchJobs} />
+      <SimilarVideoInput userId={user.id} onJobCreated={fetchJobs} />
+      <MediaReferenceInput userId={user.id} onJobCreated={fetchJobs} />
+
+      {activeJobs.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-text">Active Pipeline</h2>
+          {activeJobs.map(job => <GenerationStatus key={job.id} status={job.status} jobId={job.id} />)}
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-base font-semibold text-text mb-4">Recent Jobs</h2>
+        {jobs.length === 0 ? (
+          <div className="bg-surface border border-dashed border-border rounded-xl p-10 text-center">
+            <p className="text-muted text-sm">No videos yet. Generate your first one above.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {jobs.map(job => <VideoJobCard key={job.id} job={job} onDelete={handleDeleteJob} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
