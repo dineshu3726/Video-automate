@@ -7,6 +7,7 @@ import { VideoJob } from '@/types'
 import Link from 'next/link'
 import CategoryInput from '@/components/CategoryInput'
 import SimilarVideoInput from '@/components/SimilarVideoInput'
+import MediaReferenceInput from '@/components/MediaReferenceInput'
 import VideoJobCard from '@/components/VideoJobCard'
 import GenerationStatus from '@/components/GenerationStatus'
 import VeoPoller from '@/components/VeoPoller'
@@ -145,6 +146,7 @@ export default function DashboardClient({ user, initialJobs }: Props) {
         {/* Generate Input */}
         <CategoryInput userId={user.id} onJobCreated={fetchJobs} />
         <SimilarVideoInput userId={user.id} onJobCreated={fetchJobs} />
+        <MediaReferenceInput userId={user.id} onJobCreated={fetchJobs} />
 
         {/* Active pipeline trackers */}
         {activeJobs.length > 0 && (
