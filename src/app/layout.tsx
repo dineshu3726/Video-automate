@@ -7,8 +7,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VideoForge — AI Short-Form Video Automation",
-  description: "Automate YouTube Shorts and Instagram Reels with AI",
+  title: "Vybline — Create. Mix. Publish.",
+  description: "Record, mix background music and publish short-form video to YouTube",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

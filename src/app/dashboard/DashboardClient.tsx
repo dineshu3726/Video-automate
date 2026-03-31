@@ -10,34 +10,18 @@ import StudioTab from '@/components/tabs/StudioTab'
 import DownloaderTab from '@/components/tabs/DownloaderTab'
 import ShortsPlayer from '@/components/feed/ShortsPlayer'
 import VeoPoller from '@/components/VeoPoller'
-import ThemeToggle from '@/components/ThemeToggle'
 import {
-  Video,
-  LogOut,
-  LayoutGrid,
-  Clock,
-  CheckCircle2,
-  Settings,
-  Youtube,
-  Play,
-  Tv,
-  Sparkles,
-  Download,
+  LogOut, LayoutGrid, Clock, CheckCircle2,
+  Settings, Play, Tv, Sparkles, Download, Zap,
 } from 'lucide-react'
 
 type Tab = 'player' | 'feed' | 'studio' | 'downloader'
 
-interface TabDef {
-  id: Tab
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-}
-
-const TABS: TabDef[] = [
-  { id: 'player', label: 'Player', icon: Play },
-  { id: 'feed', label: 'Feed', icon: Tv },
-  { id: 'studio', label: 'Studio', icon: Sparkles },
-  { id: 'downloader', label: 'Downloader', icon: Download },
+const TABS = [
+  { id: 'player' as Tab,     label: 'Player',     icon: Play },
+  { id: 'feed' as Tab,       label: 'Feed',       icon: Tv },
+  { id: 'studio' as Tab,     label: 'Studio',     icon: Sparkles },
+  { id: 'downloader' as Tab, label: 'Downloader', icon: Download },
 ]
 
 interface Props {
@@ -53,138 +37,99 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
 
   const fetchJobs = useCallback(async () => {
     const { data } = await supabase
-      .from('video_jobs')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(20)
+      .from('video_jobs').select('*').eq('user_id', user.id)
+      .order('created_at', { ascending: false }).limit(20)
     if (data) setJobs(data as VideoJob[])
   }, [supabase, user.id])
 
-  // Real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('video_jobs_live')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'video_jobs',
-          filter: `user_id=eq.${user.id}`,
-        },
+    const channel = supabase.channel('video_jobs_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'video_jobs', filter: `user_id=eq.${user.id}` },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setJobs((prev) => [payload.new as VideoJob, ...prev])
-          } else if (payload.eventType === 'UPDATE') {
-            setJobs((prev) =>
-              prev.map((j) => (j.id === payload.new.id ? (payload.new as VideoJob) : j))
-            )
-          } else if (payload.eventType === 'DELETE') {
-            setJobs((prev) => prev.filter((j) => j.id !== payload.old.id))
-          }
-        }
-      )
+          if (payload.eventType === 'INSERT') setJobs(p => [payload.new as VideoJob, ...p])
+          else if (payload.eventType === 'UPDATE') setJobs(p => p.map(j => j.id === payload.new.id ? payload.new as VideoJob : j))
+          else if (payload.eventType === 'DELETE') setJobs(p => p.filter(j => j.id !== payload.old.id))
+        })
       .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [supabase, user.id])
+
+  void fetchJobs
 
   async function handleSignOut() {
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
 
-  async function handleDeleteJob(jobId: string) {
-    await supabase.from('video_jobs').delete().eq('id', jobId)
-  }
-
-  // Jobs currently in the active pipeline
-  const activeJobs = jobs.filter((j) =>
-    ['scripting', 'generating', 'processing'].includes(j.status)
-  )
-
   const stats = {
     total: jobs.length,
-    pending: jobs.filter((j) =>
-      ['pending', 'scripting', 'generating', 'processing'].includes(j.status)
-    ).length,
-    approved: jobs.filter((j) => j.status === 'approved' || j.status === 'published').length,
+    pending: jobs.filter(j => ['pending','scripting','generating','processing'].includes(j.status)).length,
+    approved: jobs.filter(j => j.status === 'approved' || j.status === 'published').length,
   }
 
-  // Suppress unused variable warnings — these are used by StudioTab via props
-  void handleDeleteJob
-  void activeJobs
-  void fetchJobs
-
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Header */}
-      <header className="border-b border-border bg-surface/50 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center">
-              <Video className="w-4 h-4 text-white" />
+    <div className="min-h-screen bg-[#0B0B14]">
+
+      {/* ── Header ── */}
+      <header className="border-b border-[#252540] bg-[#13131F]/80 backdrop-blur-xl sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #E91E8C 0%, #7C3AED 100%)' }}>
+              <Zap className="w-4 h-4 text-white fill-white" />
             </div>
-            <span className="text-text font-semibold">VideoForge</span>
+            <span className="text-white font-black text-xl tracking-tight">
+              vyb<span style={{ color: '#E91E8C' }}>line</span>
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-muted text-sm hidden sm:block">{user.email}</span>
-            <Link
-              href="/dashboard/downloader"
-              className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
-            >
-              <Youtube className="w-4 h-4" />
-              <span className="hidden sm:inline">Downloader</span>
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
-            >
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            <span className="text-[#7A7A9D] text-sm hidden sm:block">{user.email}</span>
+            <Link href="/dashboard/settings"
+              className="p-2 text-[#7A7A9D] hover:text-white rounded-lg hover:bg-[#1C1C2E] transition">
               <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
             </Link>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition"
-            >
+            <button onClick={handleSignOut}
+              className="flex items-center gap-1.5 text-[#7A7A9D] hover:text-white text-sm transition px-3 py-1.5 rounded-lg hover:bg-[#1C1C2E]">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sign out</span>
             </button>
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Tab Bar */}
-        <div className="flex gap-1 bg-surface border border-border rounded-2xl p-1.5 mb-6">
-          {TABS.map((tab) => {
+
+        {/* ── Tab Bar ── */}
+        <div className="flex gap-1 bg-[#13131F] border border-[#252540] rounded-2xl p-1.5 mb-6">
+          {TABS.map(tab => {
             const Icon = tab.icon
-            const isActive = activeTab === tab.id
+            const active = activeTab === tab.id
             return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-white text-[#2563EB] shadow border border-[#2563EB]/20 font-semibold'
-                    : 'text-muted hover:text-text'
-                }`}
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative overflow-hidden"
+                style={active ? {
+                  background: 'linear-gradient(135deg, rgba(233,30,140,0.15) 0%, rgba(124,58,237,0.15) 100%)',
+                  border: '1px solid rgba(233,30,140,0.3)',
+                } : {}}
               >
-                <Icon className="w-4 h-4" />
-                <span className="text-xs sm:text-sm">{tab.label}</span>
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FB923C]" />
+                <Icon className={`w-4 h-4 ${active ? 'text-[#E91E8C]' : 'text-[#7A7A9D]'}`} />
+                <span className={`text-xs font-semibold ${active ? 'text-white' : 'text-[#7A7A9D]'}`}>
+                  {tab.label}
+                </span>
+                {active && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                    style={{ background: 'linear-gradient(90deg, #E91E8C, #7C3AED)' }} />
                 )}
               </button>
             )
           })}
         </div>
 
-        {/* Tab Content */}
+        {/* ── Tab Content ── */}
         {activeTab === 'player' && (
           <div className="py-2">
             <ShortsPlayer ytConnected={ytConnected} />
@@ -192,61 +137,41 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
         )}
 
         {activeTab === 'feed' && (
-          <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="bg-[#13131F] border border-[#252540] rounded-2xl p-6">
             <FeedTab ytConnected={ytConnected} />
           </div>
         )}
 
         {activeTab === 'studio' && (
           <>
-            {/* Stats grid — only shown in studio tab */}
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               {[
-                {
-                  label: 'Total Jobs',
-                  value: stats.total,
-                  icon: LayoutGrid,
-                  color: 'text-violet-400',
-                },
-                {
-                  label: 'In Progress',
-                  value: stats.pending,
-                  icon: Clock,
-                  color: 'text-yellow-400',
-                },
-                {
-                  label: 'Approved',
-                  value: stats.approved,
-                  icon: CheckCircle2,
-                  color: 'text-green-400',
-                },
+                { label: 'Total Jobs',  value: stats.total,    icon: LayoutGrid,   color: '#7C3AED' },
+                { label: 'In Progress', value: stats.pending,  icon: Clock,        color: '#E91E8C' },
+                { label: 'Approved',    value: stats.approved, icon: CheckCircle2, color: '#10B981' },
               ].map(({ label, value, icon: Icon, color }) => (
-                <div
-                  key={label}
-                  className="bg-surface border border-border rounded-xl p-4"
-                >
+                <div key={label} className="bg-[#13131F] border border-[#252540] rounded-xl p-4 hover:border-[#E91E8C]/20 transition">
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className={`w-4 h-4 ${color}`} />
-                    <span className="text-muted text-xs">{label}</span>
+                    <Icon className="w-4 h-4" style={{ color }} />
+                    <span className="text-[#7A7A9D] text-xs">{label}</span>
                   </div>
-                  <p className="text-2xl font-bold text-text">{value}</p>
+                  <p className="text-2xl font-black text-white">{value}</p>
                 </div>
               ))}
             </div>
-
-            <div className="bg-surface border border-border rounded-2xl p-6">
+            <div className="bg-[#13131F] border border-[#252540] rounded-2xl p-6">
               <StudioTab user={user} initialJobs={jobs} />
             </div>
           </>
         )}
 
         {activeTab === 'downloader' && (
-          <div className="bg-surface border border-border rounded-2xl p-6">
+          <div className="bg-[#13131F] border border-[#252540] rounded-2xl p-6">
             <DownloaderTab />
           </div>
         )}
 
-        {/* Invisible Veo orchestrator -- always rendered */}
         <VeoPoller jobs={jobs} />
       </main>
     </div>
