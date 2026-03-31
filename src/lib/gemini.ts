@@ -15,6 +15,52 @@ Your outputs must be optimized for maximum watch time, virality, and ad revenue 
 Use proven hooks like shocking facts, open loops, controversial opinions, or emotional triggers to maximize retention.
 Write scripts that feel human, relatable, and keep viewers watching till the last second.`
 
+const SIMILAR_VIDEO_PROMPT = (url: string) => `${SYSTEM_PROMPT}
+
+A user has shared this reference video URL: ${url}
+
+Analyze the video's style, tone, pacing, topic, and hook technique. Then generate ORIGINAL content that is SIMILAR in style and format but with fresh, unique content — not a copy.
+
+Return ONLY a valid JSON object with these exact keys:
+{
+  "script": "A punchy, hook-first narration script (150–200 words) inspired by the reference video's style. Start with a bold hook. Use short, snappy sentences. End with a CTA like 'Follow for more!'.",
+  "veoPrompt": "A highly detailed video generation prompt for Google Veo inspired by the visual style of the reference video. Describe: visual style, subjects, camera angles, color palette, lighting, motion, background, mood. 80–120 words.",
+  "title": "An SEO-optimized YouTube Short title under 60 characters. Include an emoji.",
+  "description": "A YouTube/Instagram description under 150 characters with a call to action.",
+  "tags": ["array", "of", "10", "relevant", "hashtag", "keywords", "without", "the", "hash", "symbol"]
+}
+
+Respond with ONLY the JSON. No markdown, no code fences, no extra text.`
+
+export async function generateVideoContentFromUrl(url: string): Promise<GeneratedContent> {
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be')
+
+  let result
+  if (isYouTube) {
+    // Gemini can directly watch YouTube videos via fileData
+    result = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [
+          { fileData: { fileUri: url, mimeType: 'video/mp4' } },
+          { text: SIMILAR_VIDEO_PROMPT(url) },
+        ],
+      }],
+    })
+  } else {
+    // For Instagram / Pinterest — pass URL as text context
+    result = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: SIMILAR_VIDEO_PROMPT(url),
+    })
+  }
+
+  const text = (result.text ?? '').trim()
+  const jsonStr = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+  return JSON.parse(jsonStr) as GeneratedContent
+}
+
 export async function generateVideoContent(category: string): Promise<GeneratedContent> {
   const prompt = `${SYSTEM_PROMPT}
 
