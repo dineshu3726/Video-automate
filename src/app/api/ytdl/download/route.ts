@@ -1,6 +1,23 @@
 import { spawn } from 'child_process'
+import { writeFileSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 
 export const maxDuration = 60
+
+function getCookieArgs(): string[] {
+  const cookies = process.env.YOUTUBE_COOKIES
+  if (!cookies) return []
+  const cookiePath = join(tmpdir(), 'yt-cookies.txt')
+  try {
+    writeFileSync(cookiePath, cookies, 'utf8')
+    return ['--cookies', cookiePath]
+  } catch {
+    return []
+  }
+}
+
+const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=android,web']
 
 function getDirectUrl(videoUrl: string, formatId: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -10,8 +27,10 @@ function getDirectUrl(videoUrl: string, formatId: string): Promise<string> {
       '-f', formatId,
       '--no-check-certificates',
       '--no-warnings',
+      ...EXTRACTOR_ARGS,
       '--add-header', 'referer:youtube.com',
       '--add-header', 'user-agent:Mozilla/5.0',
+      ...getCookieArgs(),
     ], { stdio: ['ignore', 'pipe', 'pipe'] })
 
     const out: Buffer[] = []
@@ -33,6 +52,8 @@ function getVideoTitle(videoUrl: string): Promise<string> {
       '--get-title',
       '--no-check-certificates',
       '--no-warnings',
+      ...EXTRACTOR_ARGS,
+      ...getCookieArgs(),
     ], { stdio: ['ignore', 'pipe', 'pipe'] })
 
     const out: Buffer[] = []

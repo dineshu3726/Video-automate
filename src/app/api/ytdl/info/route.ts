@@ -1,7 +1,23 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
+import { writeFileSync, unlinkSync, existsSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 
 export const maxDuration = 60
+
+// Write YouTube cookies from env var to a temp file (if set)
+function getCookieArgs(): string[] {
+  const cookies = process.env.YOUTUBE_COOKIES
+  if (!cookies) return []
+  const cookiePath = join(tmpdir(), 'yt-cookies.txt')
+  try {
+    writeFileSync(cookiePath, cookies, 'utf8')
+    return ['--cookies', cookiePath]
+  } catch {
+    return []
+  }
+}
 
 function runYtdlp(args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -35,8 +51,10 @@ export async function POST(request: Request) {
       '--no-check-certificates',
       '--no-warnings',
       '--prefer-free-formats',
+      '--extractor-args', 'youtube:player_client=android,web',
       '--add-header', 'referer:youtube.com',
       '--add-header', 'user-agent:Mozilla/5.0',
+      ...getCookieArgs(),
     ])
 
     const info = JSON.parse(raw) as Record<string, unknown>
