@@ -10,11 +10,13 @@ function getCookieArgs(): string[] {
   const cookies = process.env.YOUTUBE_COOKIES
   if (!cookies) return []
   const cookiePath = join(tmpdir(), 'yt-cookies.txt')
-  try { writeFileSync(cookiePath, cookies, 'utf8') } catch { return [] }
+  // Railway stores multiline env vars with literal \n — normalize to real newlines
+  const normalized = cookies.replace(/\\n/g, '\n')
+  try { writeFileSync(cookiePath, normalized, 'utf8') } catch { return [] }
   return ['--cookies', cookiePath]
 }
 
-const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=ios,android,web']
+const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=tv_embedded,ios,android,web']
 
 // Map quality preset id → yt-dlp format selector
 function getFormatSelector(quality: string): string {

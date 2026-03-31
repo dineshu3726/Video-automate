@@ -10,7 +10,9 @@ function getCookieArgs(): string[] {
   const cookies = process.env.YOUTUBE_COOKIES
   if (!cookies) return []
   const cookiePath = join(tmpdir(), 'yt-cookies.txt')
-  try { writeFileSync(cookiePath, cookies, 'utf8') } catch { return [] }
+  // Railway stores multiline env vars with literal \n — normalize to real newlines
+  const normalized = cookies.replace(/\\n/g, '\n')
+  try { writeFileSync(cookiePath, normalized, 'utf8') } catch { return [] }
   return ['--cookies', cookiePath]
 }
 
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
       '--dump-json',
       '--no-check-certificates',
       '--no-warnings',
-      '--extractor-args', 'youtube:player_client=ios,android,web',
+      '--extractor-args', 'youtube:player_client=tv_embedded,ios,android,web',
       ...getCookieArgs(),
     ])
 
