@@ -15,8 +15,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-EXPOSE 3000
+EXPOSE 8080
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "node_modules/.bin/next start"]
