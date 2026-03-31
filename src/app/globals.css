@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
-/* ── Vybline Design System ── */
+/* ── Vybline Light Mode (default) ── */
 :root {
-  --bg: #0B0B14;
-  --bg-surface: #13131F;
-  --bg-surface2: #1C1C2E;
-  --text: #F0F0FF;
-  --text-muted: #7A7A9D;
+  --bg: #F8F7FF;
+  --bg-surface: #FFFFFF;
+  --bg-surface2: #EEEAFF;
+  --text: #0B0B14;
+  --text-muted: #6B6B8D;
   --primary: #E91E8C;
   --primary-hover: #C4176F;
   --accent: #7C3AED;
-  --border: #252540;
+  --border: #E2DEFC;
 }
 
+/* ── Vybline Dark Mode ── */
 .dark {
   --bg: #0B0B14;
   --bg-surface: #13131F;
@@ -42,4 +43,5 @@
 body {
   background: var(--bg);
   color: var(--text);
+  transition: background 0.2s, color 0.2s;
 }
