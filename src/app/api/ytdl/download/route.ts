@@ -16,17 +16,18 @@ function getCookieArgs(): string[] {
   return ['--cookies', cookiePath]
 }
 
-const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=tv_embedded,ios,android,web']
+const EXTRACTOR_ARGS = ['--extractor-args', 'youtube:player_client=android,ios,web']
 
 // Map quality preset id → yt-dlp format selector
+// Each selector falls back progressively: adaptive merge → combined stream → absolute best
 function getFormatSelector(quality: string): string {
   switch (quality) {
-    case '4k':    return 'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[height<=2160]'
-    case '1440p': return 'bestvideo[height<=1440][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1440]+bestaudio/best[height<=1440]'
-    case '1080p': return 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]'
-    case '720p':  return 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]'
-    case '480p':  return 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]'
-    case '360p':  return 'bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]'
+    case '4k':    return 'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[height<=2160]/best'
+    case '1440p': return 'bestvideo[height<=1440][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1440]+bestaudio/best[height<=1440]/best'
+    case '1080p': return 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best'
+    case '720p':  return 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best'
+    case '480p':  return 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best'
+    case '360p':  return 'bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/best'
     case 'audio': return 'bestaudio[ext=m4a]/bestaudio'
     default:      return 'bestvideo+bestaudio/best'
   }

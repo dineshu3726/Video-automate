@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       '--dump-json',
       '--no-check-certificates',
       '--no-warnings',
-      '--extractor-args', 'youtube:player_client=tv_embedded,ios,android,web',
+      '--extractor-args', 'youtube:player_client=android,ios,web',
       ...getCookieArgs(),
     ])
 
