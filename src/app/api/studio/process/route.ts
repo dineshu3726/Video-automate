@@ -6,6 +6,8 @@ import { writeFile, readFile, mkdir, rm } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 
+const MAX_DURATION = 30
+
 function resolveFfmpegPath(): string {
   const paths = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg']
   for (const p of paths) if (existsSync(p)) return p
@@ -25,10 +27,9 @@ export async function POST(request: Request) {
   const videoFile = formData.get('video') as File | null
   if (!videoFile) return new Response('No video file', { status: 400 })
 
-  const trimStart = parseFloat(formData.get('trimStart') as string) || 0
-  const trimEnd = parseFloat(formData.get('trimEnd') as string) || 0
-  const muteAudio = formData.get('muteAudio') === 'true'
-  const swapAudioFile = formData.get('swapAudio') as File | null
+  const muteOriginal = formData.get('muteOriginal') === 'true'
+  const musicFile = formData.get('music') as File | null
+  const musicVolume = Math.min(Math.max(parseFloat(formData.get('musicVolume') as string) || 0.5, 0), 1)
 
   const workDir = join('/tmp', `studio-${randomUUID()}`)
   await mkdir(workDir, { recursive: true })
@@ -37,27 +38,51 @@ export async function POST(request: Request) {
     const inputPath = join(workDir, 'input.webm')
     await writeFile(inputPath, Buffer.from(await videoFile.arrayBuffer()))
 
-    const outputPath = join(workDir, 'output.mp4')
-
-    // If swap audio provided, write it
-    let audioPath: string | null = null
-    if (swapAudioFile && !muteAudio) {
-      audioPath = join(workDir, 'audio' + (swapAudioFile.name.endsWith('.mp3') ? '.mp3' : '.wav'))
-      await writeFile(audioPath, Buffer.from(await swapAudioFile.arrayBuffer()))
+    let musicPath: string | null = null
+    if (musicFile) {
+      const ext = musicFile.name.endsWith('.mp3') ? '.mp3' : '.wav'
+      musicPath = join(workDir, `music${ext}`)
+      await writeFile(musicPath, Buffer.from(await musicFile.arrayBuffer()))
     }
 
+    const outputPath = join(workDir, 'output.mp4')
+
     await new Promise<void>((resolve, reject) => {
-      const duration = trimEnd > trimStart ? trimEnd - trimStart : undefined
       const cmd = ffmpeg(inputPath)
 
-      if (trimStart > 0) cmd.seekInput(trimStart)
-      if (duration) cmd.duration(duration)
-      if (audioPath) cmd.input(audioPath)
+      // Always enforce 30s max
+      cmd.duration(MAX_DURATION)
 
-      const outputOpts: string[] = ['-c:v libx264', '-preset ultrafast', '-crf 26', '-movflags +faststart', '-threads 1']
-      if (muteAudio) outputOpts.push('-an')
-      else if (audioPath) outputOpts.push('-map 0:v', '-map 1:a', '-c:a aac', '-b:a 128k', '-shortest')
-      else outputOpts.push('-c:a aac', '-b:a 128k')
+      if (musicPath) cmd.input(musicPath)
+
+      const outputOpts: string[] = [
+        '-c:v libx264', '-preset ultrafast', '-crf 26',
+        '-movflags +faststart', '-threads 1',
+      ]
+
+      if (muteOriginal && musicPath) {
+        // Only background music, no original audio
+        outputOpts.push(
+          '-map 0:v',
+          `-map 1:a`,
+          `-filter:a:0 volume=${musicVolume}`,
+          '-c:a aac', '-b:a 128k', '-shortest',
+        )
+      } else if (!muteOriginal && musicPath) {
+        // Mix original audio + background music
+        outputOpts.push(
+          '-filter_complex',
+          `[0:a]volume=1.0[orig];[1:a]volume=${musicVolume}[bg];[orig][bg]amix=inputs=2:duration=shortest:dropout_transition=2[aout]`,
+          '-map 0:v', '-map [aout]',
+          '-c:a aac', '-b:a 128k',
+        )
+      } else if (muteOriginal && !musicPath) {
+        // No audio at all
+        outputOpts.push('-an')
+      } else {
+        // Keep original audio as-is
+        outputOpts.push('-c:a aac', '-b:a 128k')
+      }
 
       cmd.outputOptions(outputOpts).output(outputPath)
         .on('end', () => resolve())

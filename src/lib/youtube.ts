@@ -63,6 +63,7 @@ export interface UploadOptions {
   tags: string[]
   videoBuffer: Buffer
   mimeType?: string
+  privacyStatus?: 'public' | 'unlisted' | 'private'
 }
 
 /**
@@ -73,7 +74,7 @@ export async function uploadToYouTube(
   accessToken: string,
   opts: UploadOptions
 ): Promise<string> {
-  const { title, description, tags, videoBuffer, mimeType = 'video/mp4' } = opts
+  const { title, description, tags, videoBuffer, mimeType = 'video/mp4', privacyStatus = 'public' } = opts
 
   // Step 1 — Initiate resumable upload session
   const initRes = await fetch(
@@ -93,7 +94,7 @@ export async function uploadToYouTube(
           tags,
           categoryId: '22', // People & Blogs — YouTube auto-promotes 9:16 as Shorts
         },
-        status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+        status: { privacyStatus, selfDeclaredMadeForKids: false },
       }),
     }
   )
