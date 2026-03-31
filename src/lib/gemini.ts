@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
+import { extractVideoContext } from './urlAnalyzer'
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
@@ -16,44 +17,60 @@ Use proven hooks like shocking facts, open loops, controversial opinions, or emo
 Write narration scripts in natural Hinglish — fluent Hindi sentences mixed with common English words exactly as spoken by popular Indian creators and influencers. The script must sound like a confident, energetic Indian narrator speaking naturally.
 Keep title, description, and tags in English for SEO purposes.`
 
-const SIMILAR_VIDEO_PROMPT = (url: string) => `${SYSTEM_PROMPT}
+function buildSimilarPrompt(ctx: { platform: string; title: string; description: string; url: string }): string {
+  const contextBlock = [
+    `Platform: ${ctx.platform}`,
+    ctx.title ? `Video Title: "${ctx.title}"` : '',
+    ctx.description ? `Description: "${ctx.description}"` : '',
+    `URL: ${ctx.url}`,
+  ].filter(Boolean).join('\n')
 
-A user has shared this reference video URL: ${url}
+  return `${SYSTEM_PROMPT}
 
-Analyze the video's style, tone, pacing, topic, and hook technique. Then generate ORIGINAL content that is SIMILAR in style and format but with fresh, unique content — not a copy.
+The user wants to generate a video SIMILAR to this reference:
+${contextBlock}
+
+Study the topic, niche, tone, and style from the title and description above. Then generate ORIGINAL content that matches the same niche and energy — not a copy, but a fresh new video in the same style.
 
 Return ONLY a valid JSON object with these exact keys:
 {
-  "script": "A punchy, hook-first narration script (150–200 words) inspired by the reference video's style, written in natural Hinglish — fluent Hindi with common English words mixed in, exactly like popular Indian YouTube creators speak. Start with a bold Hindi hook. Use short, energetic sentences. End with a Hindi CTA like 'Follow karo aur aisi videos ke liye!'.",
-  "veoPrompt": "A highly detailed video generation prompt for Google Veo inspired by the visual style of the reference video. Describe: visual style, subjects, camera angles, color palette, lighting, motion, background, mood. 80–120 words.",
-  "title": "An SEO-optimized YouTube Short title under 60 characters. Include an emoji.",
+  "script": "A punchy, hook-first narration script (150–200 words) in the same niche as the reference video, written in natural Hinglish — fluent Hindi with common English words mixed in, like popular Indian YouTube creators speak. Start with a bold Hindi hook. Use short, energetic sentences. End with a Hindi CTA like 'Follow karo aur aisi videos ke liye!'.",
+  "veoPrompt": "A highly detailed video generation prompt for Google Veo inspired by the visual style typical for this niche. Describe: visual style, subjects, camera angles, color palette, lighting, motion, background, mood. 80–120 words.",
+  "title": "An SEO-optimized YouTube Short title under 60 characters in the same niche. Include an emoji.",
   "description": "A YouTube/Instagram description under 150 characters with a call to action.",
   "tags": ["array", "of", "10", "relevant", "hashtag", "keywords", "without", "the", "hash", "symbol"]
 }
 
 Respond with ONLY the JSON. No markdown, no code fences, no extra text.`
+}
 
 export async function generateVideoContentFromUrl(url: string): Promise<GeneratedContent> {
-  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be')
+  // Step 1: Extract real metadata from the URL
+  const ctx = await extractVideoContext(url)
+  const prompt = buildSimilarPrompt(ctx)
 
   let result
-  if (isYouTube) {
-    // Gemini can directly watch YouTube videos via fileData
+  if (ctx.platform === 'youtube') {
+    // For YouTube, let Gemini watch the video directly (no mimeType — Gemini auto-detects YouTube URLs)
+    // AND provide extracted metadata as text so it has rich context even if video is unavailable
     result = await genAI.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [{
         role: 'user',
         parts: [
-          { fileData: { fileUri: url, mimeType: 'video/mp4' } },
-          { text: SIMILAR_VIDEO_PROMPT(url) },
+          { fileData: { fileUri: url } },
+          { text: prompt },
         ],
       }],
-    })
+    }).catch(() =>
+      // Fallback: text-only if video watch fails
+      genAI.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt })
+    )
   } else {
-    // For Instagram / Pinterest — pass URL as text context
+    // Instagram/Pinterest: use extracted OG metadata as context
     result = await genAI.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: SIMILAR_VIDEO_PROMPT(url),
+      contents: prompt,
     })
   }
 
