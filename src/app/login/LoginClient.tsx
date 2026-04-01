@@ -2,15 +2,26 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Loader2, Play } from 'lucide-react'
 import Image from 'next/image'
 
+/* ─── Floating video reel cards scattered in bg ─── */
+const REELS = [
+  { id: 1, x: '5%',  y: '8%',  rotate: -12, delay: '0s',    duration: '18s', gradient: 'linear-gradient(160deg,#7c3aed,#e91e8c)', label: 'Trending Now' },
+  { id: 2, x: '78%', y: '5%',  rotate:  10, delay: '3s',    duration: '22s', gradient: 'linear-gradient(160deg,#e91e8c,#ff6b35)', label: 'Go Viral' },
+  { id: 3, x: '88%', y: '52%', rotate:   8, delay: '1.5s',  duration: '20s', gradient: 'linear-gradient(160deg,#4a0e9e,#e91e8c)', label: 'AI Studio' },
+  { id: 4, x: '2%',  y: '58%', rotate: -8,  delay: '4s',    duration: '25s', gradient: 'linear-gradient(160deg,#c2185b,#7c3aed)', label: 'Shorts' },
+  { id: 5, x: '60%', y: '75%', rotate:  14, delay: '2s',    duration: '19s', gradient: 'linear-gradient(160deg,#ff6b35,#c2185b)', label: 'Mix & Publish' },
+  { id: 6, x: '20%', y: '80%', rotate:  -6, delay: '5.5s',  duration: '23s', gradient: 'linear-gradient(160deg,#7c3aed,#4a0e9e)', label: 'Create More' },
+  { id: 7, x: '42%', y: '3%',  rotate:   5, delay: '0.8s',  duration: '21s', gradient: 'linear-gradient(160deg,#e91e8c,#7c3aed)', label: 'Auto-Post' },
+]
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+  const [loading, setLoading]   = useState(false)
+  const [message, setMessage]   = useState<{ type: 'error' | 'success'; text: string } | null>(null)
 
   const supabase = createClient()
 
@@ -18,19 +29,17 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setMessage(null)
-
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email, password,
         options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
       })
       if (error) setMessage({ type: 'error', text: error.message })
-      else setMessage({ type: 'success', text: 'Check your email to confirm your account.' })
+      else       setMessage({ type: 'success', text: 'Check your email to confirm your account.' })
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMessage({ type: 'error', text: error.message })
-      else window.location.href = '/dashboard'
+      else       window.location.href = '/dashboard'
     }
     setLoading(false)
   }
@@ -38,200 +47,224 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @keyframes blob-drift {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(40px, -30px) scale(1.08); }
-          66%       { transform: translate(-20px, 20px) scale(0.95); }
+        /* ── page base ── */
+        * { box-sizing: border-box; }
+
+        /* ── background blobs ── */
+        @keyframes blob1 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          33%      { transform: translate(60px,-40px) scale(1.1); }
+          66%      { transform: translate(-30px,30px) scale(0.93); }
         }
-        @keyframes blob-drift-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(-50px, 30px) scale(1.1); }
-          66%       { transform: translate(30px, -20px) scale(0.92); }
+        @keyframes blob2 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          40%      { transform: translate(-70px,50px) scale(1.12); }
+          70%      { transform: translate(40px,-25px) scale(0.9); }
         }
-        @keyframes blob-drift-3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50%       { transform: translate(20px, 40px) scale(1.05); }
+        @keyframes blob3 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          50%      { transform: translate(30px,60px) scale(1.07); }
         }
-        .blob-1 { animation: blob-drift 12s ease-in-out infinite; }
-        .blob-2 { animation: blob-drift-2 15s ease-in-out infinite; }
-        .blob-3 { animation: blob-drift-3 10s ease-in-out infinite; }
-        .noise-overlay {
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        .blob-a { animation: blob1 14s ease-in-out infinite; }
+        .blob-b { animation: blob2 18s ease-in-out infinite; }
+        .blob-c { animation: blob3 11s ease-in-out infinite; }
+
+        /* ── floating reel cards ── */
+        @keyframes reel-float {
+          0%   { transform: var(--r) translateY(0px); }
+          50%  { transform: var(--r) translateY(-18px); }
+          100% { transform: var(--r) translateY(0px); }
         }
-        .input-field {
-          background: rgba(15, 8, 30, 0.5);
-          border: 1px solid rgba(255,255,255,0.1);
-          transition: border-color 0.2s, box-shadow 0.2s;
+        .reel-card {
+          animation: reel-float var(--dur) ease-in-out infinite;
+          animation-delay: var(--delay);
         }
-        .input-field:focus {
+
+        /* ── login card float ── */
+        @keyframes card-float {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-10px); }
+        }
+        .login-card-float { animation: card-float 6s ease-in-out infinite; }
+
+        /* ── inputs ── */
+        .vy-input {
+          width: 100%;
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 14px;
+          padding: 12px 14px 12px 40px;
+          color: white;
+          font-size: 14px;
           outline: none;
-          border-color: rgba(233, 30, 140, 0.6);
-          box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.12);
+          transition: border-color .2s, box-shadow .2s;
         }
-        .submit-btn {
-          background: linear-gradient(135deg, #E91E8C 0%, #7C3AED 100%);
-          box-shadow: 0 8px 32px rgba(233,30,140,0.3);
-          transition: box-shadow 0.2s, transform 0.15s;
+        .vy-input::placeholder { color: rgba(255,255,255,0.25); }
+        .vy-input:focus {
+          border-color: rgba(233,30,140,.65);
+          box-shadow: 0 0 0 3px rgba(233,30,140,.14);
         }
-        .submit-btn:hover:not(:disabled) {
-          box-shadow: 0 12px 40px rgba(233,30,140,0.5);
+
+        /* ── submit button ── */
+        .vy-btn {
+          width: 100%;
+          padding: 14px;
+          border-radius: 14px;
+          background: linear-gradient(135deg,#E91E8C 0%,#7C3AED 100%);
+          box-shadow: 0 8px 32px rgba(233,30,140,.35);
+          color: white;
+          font-weight: 800;
+          font-size: 14px;
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          cursor: pointer;
+          border: none;
+          transition: box-shadow .2s, transform .15s;
+        }
+        .vy-btn:hover:not(:disabled) {
+          box-shadow: 0 12px 40px rgba(233,30,140,.55);
           transform: translateY(-1px);
         }
-        .submit-btn:active:not(:disabled) {
-          transform: translateY(0) scale(0.98);
-        }
-        .glass-card {
-          background: rgba(12, 6, 28, 0.55);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(255,255,255,0.09);
+        .vy-btn:active:not(:disabled) { transform: scale(.98); }
+        .vy-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+        /* ── noise overlay ── */
+        .noise {
+          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
         }
       `}</style>
 
-      <div className="min-h-screen flex">
+      {/* ═══════════════ FULL PAGE ═══════════════ */}
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+        style={{ background: 'linear-gradient(140deg,#1a0533 0%,#2d0a6b 28%,#4a0e9e 52%,#7C3AED 76%,#E91E8C 100%)' }}>
 
-        {/* ── LEFT BRAND PANEL ── */}
-        <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden flex-col items-center justify-center">
+        {/* ── gradient blobs ── */}
+        <div className="blob-a absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full pointer-events-none"
+          style={{ background:'radial-gradient(circle,#9c27b0 0%,transparent 65%)', filter:'blur(80px)', opacity:.55 }} />
+        <div className="blob-b absolute -bottom-48 -right-48 w-[800px] h-[800px] rounded-full pointer-events-none"
+          style={{ background:'radial-gradient(circle,#e91e8c 0%,#ff5722 55%,transparent 75%)', filter:'blur(90px)', opacity:.5 }} />
+        <div className="blob-c absolute top-1/3 right-1/4 w-[450px] h-[450px] rounded-full pointer-events-none"
+          style={{ background:'radial-gradient(circle,#7c3aed 0%,transparent 70%)', filter:'blur(60px)', opacity:.38 }} />
 
-          {/* Base gradient */}
-          <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(145deg, #1a0533 0%, #3b0764 25%, #6d1b7b 50%, #c2185b 78%, #e64a19 100%)' }} />
+        {/* ── noise texture ── */}
+        <div className="noise absolute inset-0 pointer-events-none opacity-40" />
 
-          {/* Animated liquid blobs */}
-          <div className="blob-1 absolute top-[-10%] left-[-10%] w-[75%] h-[75%] rounded-full opacity-60"
-            style={{ background: 'radial-gradient(circle at 40% 40%, #9c27b0 0%, transparent 65%)', filter: 'blur(60px)' }} />
-          <div className="blob-2 absolute bottom-[-15%] right-[-10%] w-[80%] h-[80%] rounded-full opacity-55"
-            style={{ background: 'radial-gradient(circle at 60% 60%, #e91e8c 0%, #ff5722 60%, transparent 80%)', filter: 'blur(70px)' }} />
-          <div className="blob-3 absolute top-[30%] right-[10%] w-[50%] h-[50%] rounded-full opacity-40"
-            style={{ background: 'radial-gradient(circle at 50% 50%, #7c3aed 0%, transparent 70%)', filter: 'blur(50px)' }} />
+        {/* ── subtle grid ── */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+          style={{
+            backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
+            backgroundSize:'56px 56px',
+          }} />
 
-          {/* Holographic sheen */}
-          <div className="absolute inset-0 opacity-20"
-            style={{ background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.08) 40%, transparent 60%, rgba(255,150,200,0.06) 100%)' }} />
-
-          {/* Noise texture */}
-          <div className="noise-overlay absolute inset-0 opacity-30" />
-
-          {/* Subtle grid lines */}
-          <div className="absolute inset-0 opacity-[0.04]"
+        {/* ══════════ FLOATING REEL CARDS ══════════ */}
+        {REELS.map(r => (
+          <div
+            key={r.id}
+            className="reel-card absolute pointer-events-none select-none"
             style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }} />
-
-          {/* Ring accents */}
-          <div className="absolute top-12 right-12 w-28 h-28 rounded-full border border-white/10" />
-          <div className="absolute top-16 right-16 w-16 h-16 rounded-full border border-white/10" />
-          <div className="absolute bottom-16 left-12 w-36 h-36 rounded-full border border-white/10" />
-          <div className="absolute bottom-20 left-16 w-20 h-20 rounded-full border border-white/10" />
-          <div className="absolute top-1/2 left-8 w-8 h-8 rounded-full border border-white/10 -translate-y-1/2" />
-
-          {/* Content */}
-          <div className="relative z-10 flex flex-col items-center text-center px-12">
-            <div className="relative w-36 h-36 mb-6 drop-shadow-2xl">
-              <Image
-                src="/vybline-logo.png"
-                alt="Vybline"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-
-            <h1 className="text-5xl font-black text-white tracking-tight mb-2" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}>
-              Vybline
-            </h1>
-            <p className="text-white/50 text-xs tracking-[0.35em] uppercase font-medium mb-10">
-              Create · Mix · Publish
-            </p>
-
-            {/* Feature pills */}
-            <div className="flex flex-col gap-3 w-full max-w-xs">
-              {[
-                { icon: '✦', label: 'AI-Powered Video Generation' },
-                { icon: '⟳', label: 'Auto-Publish to YouTube & Reels' },
-                { icon: '◈', label: 'Studio-Grade Editing Tools' },
-              ].map(f => (
-                <div key={f.label} className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <span className="text-pink-300 text-sm">{f.icon}</span>
-                  <span className="text-white/70 text-sm font-medium">{f.label}</span>
+              left: r.x, top: r.y,
+              '--r': `rotate(${r.rotate}deg)`,
+              '--dur': r.duration,
+              '--delay': r.delay,
+            } as React.CSSProperties}
+          >
+            {/* phone frame */}
+            <div className="relative w-[72px] h-[126px] rounded-[14px] overflow-hidden shadow-2xl"
+              style={{
+                background: r.gradient,
+                border: '2px solid rgba(255,255,255,0.18)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+              }}>
+              {/* scanline sheen */}
+              <div className="absolute inset-0"
+                style={{ background:'linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 40%)' }} />
+              {/* play icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background:'rgba(255,255,255,0.25)', backdropFilter:'blur(4px)' }}>
+                  <Play className="w-3 h-3 text-white fill-white ml-0.5" />
                 </div>
-              ))}
+              </div>
+              {/* label */}
+              <div className="absolute bottom-2 left-0 right-0 text-center">
+                <span className="text-white/70 font-semibold"
+                  style={{ fontSize:'7px', letterSpacing:'0.05em' }}>
+                  {r.label}
+                </span>
+              </div>
+              {/* notch */}
+              <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full"
+                style={{ background:'rgba(0,0,0,0.25)' }} />
             </div>
           </div>
+        ))}
 
-          {/* Bottom label */}
-          <p className="absolute bottom-6 left-0 right-0 text-center text-white/20 text-xs tracking-widest uppercase">
-            Short-form Content Engine
-          </p>
-        </div>
+        {/* ══════════ CENTER LOGIN CARD ══════════ */}
+        <div className="login-card-float relative z-10 w-full max-w-[400px]">
+          <div className="rounded-[28px] px-8 py-9 shadow-2xl"
+            style={{
+              background:'rgba(255,255,255,0.08)',
+              backdropFilter:'blur(28px)',
+              WebkitBackdropFilter:'blur(28px)',
+              border:'1px solid rgba(255,255,255,0.16)',
+              boxShadow:'0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12)',
+            }}>
 
-        {/* ── RIGHT FORM PANEL ── */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative"
-          style={{ background: '#0a0514' }}>
-
-          {/* Subtle corner glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 opacity-20 pointer-events-none"
-            style={{ background: 'radial-gradient(circle at 100% 0%, #7c3aed 0%, transparent 70%)' }} />
-          <div className="absolute bottom-0 left-0 w-64 h-64 opacity-15 pointer-events-none"
-            style={{ background: 'radial-gradient(circle at 0% 100%, #e91e8c 0%, transparent 70%)' }} />
-
-          <div className="w-full max-w-sm relative z-10">
-
-            {/* Mobile logo */}
-            <div className="flex lg:hidden flex-col items-center gap-2 mb-10">
-              <div className="relative w-20 h-20">
-                <Image src="/vybline-logo.png" alt="Vybline" fill className="object-contain" priority />
+            {/* ── Logo ── */}
+            <div className="flex flex-col items-center mb-7">
+              {/* logo with screen blend to remove white bg */}
+              <div className="relative w-32 h-32" style={{ mixBlendMode:'screen' }}>
+                <Image
+                  src="/vybline-logo.png"
+                  alt="Vybline"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
-              <p className="text-white/40 text-xs tracking-[0.3em] uppercase">Create · Mix · Publish</p>
-            </div>
-
-            {/* Heading */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-white mb-1.5">
-                {isSignUp ? 'Get started' : 'Welcome back'}
-              </h2>
-              <p className="text-white/40 text-sm">
-                {isSignUp
-                  ? 'Create your Vybline account to start.'
-                  : 'Sign in to your Vybline studio.'}
+              <p className="text-white/45 text-[10px] tracking-[0.4em] uppercase font-semibold -mt-1">
+                Create · Mix · Publish
               </p>
             </div>
 
-            {/* Form */}
+            {/* ── Heading ── */}
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-black text-white mb-1">
+                {isSignUp ? 'Get started' : 'Welcome back'}
+              </h2>
+              <p className="text-white/40 text-sm">
+                {isSignUp ? 'Create your Vybline account.' : 'Sign in to your studio.'}
+              </p>
+            </div>
+
+            {/* ── Form ── */}
             <form onSubmit={handleSubmit} className="space-y-4">
 
               <div>
-                <label className="text-xs text-white/40 mb-2 block uppercase tracking-widest font-semibold">
+                <label className="text-[10px] text-white/40 mb-1.5 block uppercase tracking-widest font-semibold">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
                   <input
-                    type="email"
-                    value={email}
+                    type="email" value={email}
                     onChange={e => setEmail(e.target.value)}
-                    required
-                    placeholder="you@example.com"
-                    className="input-field w-full rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-white/20 text-sm"
+                    required placeholder="you@example.com"
+                    className="vy-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-white/40 mb-2 block uppercase tracking-widest font-semibold">
+                <label className="text-[10px] text-white/40 mb-1.5 block uppercase tracking-widest font-semibold">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
                   <input
-                    type="password"
-                    value={password}
+                    type="password" value={password}
                     onChange={e => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    className="input-field w-full rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-white/20 text-sm"
+                    required placeholder="••••••••"
+                    className="vy-input"
                   />
                 </div>
               </div>
@@ -246,33 +279,26 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="submit-btn w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm mt-2"
-              >
-                {loading
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <ArrowRight className="w-4 h-4" />
-                }
+              <button type="submit" disabled={loading} className="vy-btn mt-1">
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSignUp ? 'Create Account' : 'Sign In'}
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="flex items-center gap-3 my-7">
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
-              <span className="text-white/25 text-xs uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            {/* ── Divider ── */}
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.08)' }} />
+              <span className="text-white/25 text-[10px] uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.08)' }} />
             </div>
 
-            {/* Toggle */}
+            {/* ── Toggle sign in / sign up ── */}
             <p className="text-center text-sm text-white/35">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
                 onClick={() => { setIsSignUp(!isSignUp); setMessage(null) }}
                 className="font-bold transition-colors"
-                style={{ color: '#E91E8C' }}
+                style={{ color:'#E91E8C' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#ff4dac')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#E91E8C')}
               >
@@ -280,11 +306,12 @@ export default function LoginPage() {
               </button>
             </p>
 
-            {/* Footer */}
-            <p className="text-center text-white/15 text-xs mt-10 tracking-wider">
-              © 2025 Vybline · All rights reserved
-            </p>
           </div>
+
+          {/* footer */}
+          <p className="text-center text-white/20 text-[10px] mt-5 tracking-widest uppercase">
+            © 2025 Vybline · Short-form Content Engine
+          </p>
         </div>
 
       </div>
