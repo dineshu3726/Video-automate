@@ -144,13 +144,9 @@ export default function LoginPage() {
         onMouseMove={onPageMove}
       >
 
-        {/* ── 1. Holographic photo background ── */}
+        {/* ── 1. Deep dark base ── */}
         <div className="absolute inset-0 z-0"
-          style={{ backgroundImage:"url('/vybline-bg.webp')", backgroundSize:'cover', backgroundPosition:'center' }} />
-
-        {/* ── 2. Dark base tint ── */}
-        <div className="absolute inset-0 z-[1]"
-          style={{ background:'rgba(8,2,24,0.48)' }} />
+          style={{ background:'linear-gradient(140deg,#0d0120 0%,#12022a 40%,#1a0330 70%,#0a0118 100%)' }} />
 
         {/* ── 3. Aurora colour orbs (mouse-reactive parallax) ── */}
         {ORBS.map((o, i) => {
