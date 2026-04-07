@@ -19,14 +19,19 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.redirect(`${origin}/login`)
 
   try {
-    // Pass the same origin-derived redirect_uri used during initiation
     const token = await exchangeYouTubeCode(code, `${origin}/api/auth/youtube/callback`)
     const admin = createAdminClient()
 
-    // upsert so new users (no profiles row yet) also get their token saved
-    await admin
+    // Must include email because profiles.email is NOT NULL.
+    // upsert: creates the row if missing, updates yt_token if it exists.
+    const { error: dbError } = await admin
       .from('profiles')
-      .upsert({ id: user.id, yt_token: JSON.stringify(token) }, { onConflict: 'id' })
+      .upsert(
+        { id: user.id, email: user.email ?? '', yt_token: JSON.stringify(token) },
+        { onConflict: 'id' }
+      )
+
+    if (dbError) throw new Error(dbError.message)
 
     return NextResponse.redirect(`${origin}/dashboard/settings?connected=youtube`)
   } catch (err) {

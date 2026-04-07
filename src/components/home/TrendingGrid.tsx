@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { Loader2, X, ChevronDown, Eye, ThumbsUp, Waves, Settings, LogOut, Clapperboard } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 // ── Region maps ───────────────────────────────────────────────────────────────
 const LOCALE_TO_REGION: Record<string, string> = {
@@ -300,8 +301,9 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
         style={{ background:'rgba(9,18,40,0.97)', backdropFilter:'blur(20px)' }}>
         <div className="w-full px-4 sm:px-6 h-14 flex items-center gap-4">
 
-          {/* LEFT: Region picker + Logo */}
+          {/* LEFT: ThemeToggle + Region picker + Logo */}
           <div className="flex items-center gap-3 flex-shrink-0">
+            <ThemeToggle />
             {/* Region picker */}
             <div className="relative" ref={pickerRef}>
               <button
