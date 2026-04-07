@@ -228,7 +228,7 @@ export default function LoginPage() {
                 <h2 className="sb-heading text-xl font-semibold text-white mb-1">
                   {isSignUp ? 'Create Account' : 'Welcome Back'}
                 </h2>
-                <p style={{ color:'rgba(240,230,208,0.38)', fontSize:'13px' }}>
+                <p style={{ color:'rgba(255,255,255,0.55)', fontSize:'13px' }}>
                   {isSignUp ? 'Join your creative studio.' : 'Sign in to your studio.'}
                 </p>
               </div>
@@ -278,12 +278,12 @@ export default function LoginPage() {
               {/* ── Divider ── */}
               <div className="fu4 flex items-center gap-3 my-5">
                 <div className="flex-1 h-px" style={{ background:'rgba(201,168,76,0.12)' }} />
-                <span className="text-[10px] uppercase tracking-wider" style={{ color:'rgba(240,230,208,0.22)' }}>or</span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color:'rgba(255,255,255,0.35)' }}>or</span>
                 <div className="flex-1 h-px" style={{ background:'rgba(201,168,76,0.12)' }} />
               </div>
 
               {/* ── Toggle ── */}
-              <p className="fu4 text-center text-sm" style={{ color:'rgba(240,230,208,0.32)' }}>
+              <p className="fu4 text-center text-sm" style={{ color:'rgba(255,255,255,0.5)' }}>
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   onClick={() => { setIsSignUp(!isSignUp); setMessage(null) }}

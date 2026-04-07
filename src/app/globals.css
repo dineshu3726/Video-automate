@@ -87,12 +87,12 @@ body {
   border: 1px solid rgba(201,168,76,0.18);
   border-radius: 10px;
   padding: 12px 14px 12px 40px;
-  color: var(--text);
+  color: #ffffff;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.sb-input::placeholder { color: rgba(240,230,208,0.3); }
+.sb-input::placeholder { color: rgba(255,255,255,0.3); }
 .sb-input:focus {
   border-color: rgba(201,168,76,0.55);
   box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
