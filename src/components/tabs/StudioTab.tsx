@@ -26,9 +26,13 @@ export default function StudioTab({ user, initialJobs }: Props) {
       <div className="flex gap-1 bg-surface border border-border rounded-xl p-1">
         {SUB_TABS.map(t => (
           <button key={t.id} onClick={() => setSubTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition ${
-              subTab === t.id ? 'bg-bg text-text shadow-sm border border-border' : 'text-muted hover:text-text'
-            }`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition`}
+            style={subTab === t.id ? {
+              background:'linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(20,184,166,0.07) 100%)',
+              border:'1px solid rgba(201,168,76,0.22)',
+              color:'var(--color-text)',
+            } : { color:'var(--color-muted)' }}
+          >
             {t.icon}
             <span className="hidden sm:inline">{t.label}</span>
           </button>

@@ -1,6 +1,6 @@
 'use client'
 import { User } from '@supabase/supabase-js'
-import { Video, LogOut, Settings, Tv, Download, Clapperboard } from 'lucide-react'
+import { LogOut, Settings, Tv, Download, Clapperboard, Waves } from 'lucide-react'
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -28,14 +28,17 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur">
+    <header className="sb-wave-border sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
         {/* Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-            <Video className="w-3.5 h-3.5 text-white" />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', boxShadow:'0 2px 8px rgba(201,168,76,0.4)' }}>
+            <Waves className="w-3.5 h-3.5" style={{ color:'#060F1E' }} />
           </div>
-          <span className="text-text font-bold text-sm hidden sm:block">VideoForge</span>
+          <span className="sb-heading text-text font-bold text-sm hidden sm:block">
+            Video<span style={{ color:'var(--color-primary)' }}>Forge</span>
+          </span>
         </div>
 
         {/* Tabs */}
@@ -44,11 +47,16 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
             <button
               key={t.id}
               onClick={() => onTabChange(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                activeTab === t.id
-                  ? 'bg-primary text-white'
-                  : 'text-muted hover:text-text hover:bg-surface2'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition`}
+              style={activeTab === t.id ? {
+                background:'linear-gradient(135deg, rgba(201,168,76,0.12) 0%, rgba(20,184,166,0.08) 100%)',
+                border:'1px solid rgba(201,168,76,0.25)',
+                color:'var(--color-primary)',
+              } : {
+                color:'var(--color-muted)',
+              }}
+              onMouseEnter={e => { if (activeTab !== t.id) e.currentTarget.style.color = 'var(--color-text)' }}
+              onMouseLeave={e => { if (activeTab !== t.id) e.currentTarget.style.color = 'var(--color-muted)' }}
             >
               {t.icon}
               <span className="hidden sm:inline">{t.label}</span>
@@ -61,19 +69,20 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
           <ThemeToggle />
           <Link
             href="/dashboard/settings"
-            className="w-9 h-9 rounded-xl flex items-center justify-center border border-border text-muted hover:text-text hover:bg-surface transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-border text-muted hover:text-text hover:bg-surface2 transition"
             title="Settings"
           >
             <Settings className="w-4 h-4" />
           </Link>
           <button
             onClick={signOut}
-            className="w-9 h-9 rounded-xl flex items-center justify-center border border-border text-muted hover:text-red-400 hover:bg-surface transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-border text-muted hover:text-red-400 hover:bg-surface2 transition"
             title="Sign out"
           >
             <LogOut className="w-4 h-4" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', color:'#060F1E' }}>
             {user.email?.[0]?.toUpperCase() ?? 'U'}
           </div>
         </div>

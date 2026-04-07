@@ -13,7 +13,7 @@ import VeoPoller from '@/components/VeoPoller'
 import ThemeToggle from '@/components/ThemeToggle'
 import {
   LogOut, LayoutGrid, Clock, CheckCircle2,
-  Settings, Play, Tv, Sparkles, Download, Zap,
+  Settings, Play, Tv, Sparkles, Download, Waves,
 } from 'lucide-react'
 
 type Tab = 'player' | 'feed' | 'studio' | 'downloader'
@@ -72,16 +72,16 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
     <div className="min-h-screen bg-bg">
 
       {/* ── Header ── */}
-      <header className="border-b border-border bg-surface/80 backdrop-blur-xl sticky top-0 z-20">
+      <header className="sb-wave-border border-b border-border bg-surface/90 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #E91E8C 0%, #7C3AED 100%)' }}>
-              <Zap className="w-4 h-4 text-white fill-white" />
+              style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 50%, #E8C86A 100%)', boxShadow:'0 4px 14px rgba(201,168,76,0.4)' }}>
+              <Waves className="w-4 h-4" style={{ color:'#060F1E' }} />
             </div>
-            <span className="text-text font-black text-xl tracking-tight">
-              vyb<span className="text-primary">line</span>
+            <span className="sb-heading text-text font-bold text-xl tracking-wide">
+              Video<span style={{ color:'var(--color-primary)' }}>Forge</span>
             </span>
           </div>
 
@@ -115,17 +115,17 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
                   active ? 'shadow-sm' : 'hover:bg-surface2'
                 }`}
                 style={active ? {
-                  background: 'linear-gradient(135deg, rgba(233,30,140,0.12) 0%, rgba(124,58,237,0.12) 100%)',
-                  border: '1px solid rgba(233,30,140,0.25)',
+                  background:'linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(20,184,166,0.08) 100%)',
+                  border:'1px solid rgba(201,168,76,0.22)',
                 } : {}}
               >
-                <Icon className={`w-4 h-4 ${active ? 'text-primary' : 'text-muted'}`} />
-                <span className={`text-xs font-semibold ${active ? 'text-text' : 'text-muted'}`}>
+                <Icon className={`w-4 h-4`} style={{ color: active ? 'var(--color-primary)' : 'var(--color-muted)' }} />
+                <span className={`text-xs font-semibold`} style={{ color: active ? 'var(--color-text)' : 'var(--color-muted)' }}>
                   {tab.label}
                 </span>
                 {active && (
                   <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #E91E8C, #7C3AED)' }} />
+                    style={{ background:'linear-gradient(90deg, #B8923A, #C9A84C, #E8C86A)' }} />
                 )}
               </button>
             )
@@ -149,16 +149,20 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
               {[
-                { label: 'Total Jobs',  value: stats.total,    icon: LayoutGrid,   color: 'text-accent' },
-                { label: 'In Progress', value: stats.pending,  icon: Clock,        color: 'text-primary' },
-                { label: 'Approved',    value: stats.approved, icon: CheckCircle2, color: 'text-emerald-500' },
-              ].map(({ label, value, icon: Icon, color }) => (
-                <div key={label} className="bg-surface border border-border rounded-xl p-4 hover:border-primary/20 transition">
+                { label: 'Total Jobs',   value: stats.total,    icon: LayoutGrid,   accent: 'var(--color-accent)' },
+                { label: 'In Progress',  value: stats.pending,  icon: Clock,        accent: 'var(--color-primary)' },
+                { label: 'Approved',     value: stats.approved, icon: CheckCircle2, accent: '#34d399' },
+              ].map(({ label, value, icon: Icon, accent }) => (
+                <div key={label}
+                  className="bg-surface border border-border rounded-xl p-4 transition"
+                  style={{ borderColor:'var(--color-border)' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border)')}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className={`w-4 h-4 ${color}`} />
+                    <Icon className="w-4 h-4" style={{ color: accent }} />
                     <span className="text-muted text-xs">{label}</span>
                   </div>
-                  <p className="text-2xl font-black text-text">{value}</p>
+                  <p className="sb-heading text-2xl font-bold text-text">{value}</p>
                 </div>
               ))}
             </div>

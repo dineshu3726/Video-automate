@@ -81,7 +81,7 @@ export default function AccountSettings({
   return (
     <div className="min-h-screen bg-bg text-text">
       {/* Header */}
-      <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-20">
+      <header className="sb-wave-border border-b border-border bg-surface/90 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <Link
             href="/dashboard"
@@ -114,9 +114,10 @@ export default function AccountSettings({
 
         {/* Account */}
         <div>
-          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Account</h2>
+          <h2 className="sb-heading text-xs font-semibold text-muted uppercase tracking-wider mb-3">Account</h2>
           <div className="bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-xs font-bold text-white">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', color:'#060F1E' }}>
               {email[0]?.toUpperCase()}
             </div>
             <span className="text-muted text-sm">{email}</span>
@@ -125,7 +126,7 @@ export default function AccountSettings({
 
         {/* Social platforms */}
         <div>
-          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
+          <h2 className="sb-heading text-xs font-semibold text-muted uppercase tracking-wider mb-3">
             Connected Platforms
           </h2>
           <div className="space-y-3">
@@ -174,7 +175,7 @@ export default function AccountSettings({
 
         {/* Post schedule */}
         <div>
-          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="sb-heading text-xs font-semibold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Clock className="w-3.5 h-3.5" /> Post Schedule
           </h2>
           <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
@@ -185,7 +186,7 @@ export default function AccountSettings({
               <select
                 value={interval}
                 onChange={(e) => setInterval(e.target.value)}
-                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-violet-500 transition"
+                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-primary transition"
               >
                 {[1, 2, 4, 6, 12, 24, 48, 72].map((h) => (
                   <option key={h} value={h}>
@@ -200,13 +201,13 @@ export default function AccountSettings({
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-violet-500 transition"
+                className="w-full bg-surface2 border border-border rounded-lg px-3 py-2 text-text text-sm focus:outline-none focus:border-primary transition"
               />
             </div>
             <button
               onClick={saveSchedule}
               disabled={saving}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+              className="sb-btn-primary flex items-center gap-2 disabled:opacity-50 text-sm px-4 py-2 rounded-lg"
             >
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {saved ? 'Saved!' : 'Save Schedule'}
@@ -216,10 +217,11 @@ export default function AccountSettings({
 
         {/* VideoForge logo */}
         <div className="flex items-center gap-2 pt-4 border-t border-border">
-          <div className="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center">
-            <Video className="w-3 h-3 text-white" />
+          <div className="w-6 h-6 rounded-md flex items-center justify-center"
+            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)' }}>
+            <Video className="w-3 h-3" style={{ color:'#060F1E' }} />
           </div>
-          <span className="text-muted/50 text-xs">VideoForge</span>
+          <span className="sb-heading text-muted/50 text-xs">VideoForge</span>
         </div>
       </main>
     </div>

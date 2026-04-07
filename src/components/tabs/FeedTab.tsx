@@ -46,14 +46,15 @@ export default function FeedTab({ ytConnected }: Props) {
   if (!ytConnected) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <div className="w-16 h-16 bg-red-600/20 rounded-2xl flex items-center justify-center">
-          <Youtube className="w-8 h-8 text-red-400" />
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+          style={{ background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)' }}>
+          <Youtube className="w-8 h-8" style={{ color:'#C9A84C' }} />
         </div>
-        <h2 className="text-text text-lg font-semibold">Connect YouTube to load your feed</h2>
+        <h2 className="sb-heading text-text text-lg font-semibold">Connect YouTube to load your feed</h2>
         <p className="text-muted text-sm text-center max-w-sm">Your personalized Shorts feed from your subscribed channels will appear here.</p>
         <Link
           href="/api/auth/youtube"
-          className="bg-red-600 hover:bg-red-500 text-white font-medium px-5 py-2.5 rounded-xl transition flex items-center gap-2"
+          className="sb-btn-primary font-medium px-5 py-2.5 rounded-xl flex items-center gap-2"
         >
           <Youtube className="w-4 h-4" /> Connect YouTube
         </Link>
@@ -65,7 +66,7 @@ export default function FeedTab({ ytConnected }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-text font-semibold text-lg">My Shorts Feed</h2>
+          <h2 className="sb-heading text-text font-semibold text-lg">My Shorts Feed</h2>
           <p className="text-muted text-sm">Latest Shorts from your subscriptions</p>
         </div>
         <button

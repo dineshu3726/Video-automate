@@ -2,16 +2,14 @@
 
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, Loader2 } from 'lucide-react'
-import Image from 'next/image'
+import { Mail, Lock, Loader2, Waves } from 'lucide-react'
 
-/* ── Aurora orbs: large soft blobs that drift + react to mouse ── */
-const ORBS = [
-  { id:1, cx:18,  cy:22,  size:620, color:'#7c3aed', blur:120, depth:0.25, dur:'22s', delay:'0s'   },
-  { id:2, cx:75,  cy:65,  size:720, color:'#e91e8c', blur:140, depth:0.40, dur:'28s', delay:'5s'   },
-  { id:3, cx:55,  cy:85,  size:560, color:'#ff5c35', blur:110, depth:0.30, dur:'19s', delay:'2s'   },
-  { id:4, cx:82,  cy:18,  size:580, color:'#c084fc', blur:130, depth:0.50, dur:'24s', delay:'8s'   },
-  { id:5, cx:30,  cy:55,  size:480, color:'#9333ea', blur:100, depth:0.20, dur:'32s', delay:'3.5s' },
+const BUBBLES = [
+  { id:1, cx:12,  cy:30,  r:260, blur:90,  dur:'26s', delay:'0s'   },
+  { id:2, cx:80,  cy:70,  r:320, blur:110, dur:'32s', delay:'4s'   },
+  { id:3, cx:50,  cy:15,  r:200, blur:70,  dur:'20s', delay:'8s'   },
+  { id:4, cx:88,  cy:20,  r:240, blur:80,  dur:'28s', delay:'2s'   },
+  { id:5, cx:25,  cy:80,  r:180, blur:60,  dur:'22s', delay:'6s'   },
 ]
 
 export default function LoginPage() {
@@ -33,7 +31,7 @@ export default function LoginPage() {
     const rect = e.currentTarget.getBoundingClientRect()
     const cx = (e.clientX - rect.left) / rect.width  - 0.5
     const cy = (e.clientY - rect.top)  / rect.height - 0.5
-    setTilt({ x: cy * -11, y: cx * 11 })
+    setTilt({ x: cy * -8, y: cx * 8 })
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,202 +55,181 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        /* ── Aurora orb drift ── */
-        @keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(55px,-40px) scale(1.08)} 70%{transform:translate(-30px,25px) scale(0.94)} }
-        @keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-65px,45px) scale(1.1)} 68%{transform:translate(35px,-20px) scale(0.91)} }
-        @keyframes orbDrift3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,55px) scale(1.06)} }
-        @keyframes orbDrift4 { 0%,100%{transform:translate(0,0) scale(1)} 30%{transform:translate(-45px,-35px) scale(1.09)} 65%{transform:translate(28px,18px) scale(0.95)} }
-        @keyframes orbDrift5 { 0%,100%{transform:translate(0,0) scale(1)} 45%{transform:translate(30px,-50px) scale(1.07)} 72%{transform:translate(-20px,30px) scale(0.97)} }
-        .orb-1{animation:orbDrift1 22s ease-in-out infinite}
-        .orb-2{animation:orbDrift2 28s ease-in-out infinite;animation-delay:5s}
-        .orb-3{animation:orbDrift3 19s ease-in-out infinite;animation-delay:2s}
-        .orb-4{animation:orbDrift4 24s ease-in-out infinite;animation-delay:8s}
-        .orb-5{animation:orbDrift5 32s ease-in-out infinite;animation-delay:3.5s}
+        /* ── Ocean bubble drift ── */
+        @keyframes bubbleDrift1 { 0%,100%{transform:translate(0,0) scale(1)}   45%{transform:translate(40px,-35px) scale(1.06)} 75%{transform:translate(-25px,20px) scale(0.96)} }
+        @keyframes bubbleDrift2 { 0%,100%{transform:translate(0,0) scale(1)}   38%{transform:translate(-50px,40px) scale(1.08)} 70%{transform:translate(30px,-15px) scale(0.93)} }
+        @keyframes bubbleDrift3 { 0%,100%{transform:translate(0,0) scale(1)}   55%{transform:translate(35px,45px) scale(1.05)} }
+        @keyframes bubbleDrift4 { 0%,100%{transform:translate(0,0) scale(1)}   32%{transform:translate(-38px,-30px) scale(1.07)} 68%{transform:translate(22px,16px) scale(0.94)} }
+        @keyframes bubbleDrift5 { 0%,100%{transform:translate(0,0) scale(1)}   48%{transform:translate(25px,-42px) scale(1.06)} 74%{transform:translate(-18px,28px) scale(0.97)} }
+        .sb-bubble-1{animation:bubbleDrift1 26s ease-in-out infinite}
+        .sb-bubble-2{animation:bubbleDrift2 32s ease-in-out infinite;animation-delay:4s}
+        .sb-bubble-3{animation:bubbleDrift3 20s ease-in-out infinite;animation-delay:8s}
+        .sb-bubble-4{animation:bubbleDrift4 28s ease-in-out infinite;animation-delay:2s}
+        .sb-bubble-5{animation:bubbleDrift5 22s ease-in-out infinite;animation-delay:6s}
 
-        /* ── Chromatic ring on card ── */
-        @keyframes ringRotate {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+        /* ── Card border shimmer ── */
+        @keyframes goldShimmer {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        .card-ring {
-          animation: ringRotate 6s linear infinite;
-        }
-
-        /* ── Pulsing glow on card ── */
-        @keyframes cardGlow {
-          0%,100% { box-shadow: 0 0 40px rgba(124,58,237,0.35), 0 40px 80px rgba(0,0,0,0.55); }
-          33%      { box-shadow: 0 0 50px rgba(233,30,140,0.4),  0 40px 80px rgba(0,0,0,0.55); }
-          66%      { box-shadow: 0 0 45px rgba(192,132,252,0.35),0 40px 80px rgba(0,0,0,0.55); }
-        }
-        .card-glow { animation: cardGlow 5s ease-in-out infinite; }
-
-        /* ── Logo halo pulse ── */
-        @keyframes logoHalo {
-          0%,100% { opacity: 0.5; transform: scale(1); }
-          50%      { opacity: 0.85; transform: scale(1.06); }
-        }
-        .logo-halo { animation: logoHalo 3.5s ease-in-out infinite; }
-
-        /* ── Inputs ── */
-        .vy-input {
-          width:100%; background:rgba(255,255,255,0.06);
-          border:1px solid rgba(255,255,255,0.12); border-radius:14px;
-          padding:12px 14px 12px 40px; color:white; font-size:14px; outline:none;
-          transition:border-color .2s, box-shadow .2s, background .2s;
-        }
-        .vy-input::placeholder { color:rgba(255,255,255,0.24); }
-        .vy-input:focus {
-          background:rgba(255,255,255,0.09);
-          border-color:rgba(233,30,140,.6);
-          box-shadow:0 0 0 3px rgba(233,30,140,.13);
+        .sb-card-border {
+          background: linear-gradient(135deg, #C9A84C, #1A2E52, #14B8A6, #1A2E52, #C9A84C);
+          background-size: 300% 300%;
+          animation: goldShimmer 6s ease infinite;
         }
 
-        /* ── Button ── */
-        .vy-btn {
-          width:100%; padding:14px; border-radius:14px;
-          background:linear-gradient(135deg,#E91E8C 0%,#7C3AED 100%);
-          box-shadow:0 8px 30px rgba(233,30,140,.4);
-          color:white; font-weight:800; font-size:14px; letter-spacing:0.03em;
-          display:flex; align-items:center; justify-content:center; gap:8px;
-          cursor:pointer; border:none; transition:box-shadow .25s, transform .15s;
+        /* ── Card depth glow ── */
+        @keyframes cardDepth {
+          0%,100% { box-shadow: 0 0 50px rgba(201,168,76,0.2), 0 50px 100px rgba(6,15,30,0.8); }
+          50%      { box-shadow: 0 0 70px rgba(20,184,166,0.18), 0 50px 100px rgba(6,15,30,0.8); }
         }
-        .vy-btn:hover:not(:disabled) { box-shadow:0 14px 44px rgba(233,30,140,.62); transform:translateY(-1px); }
-        .vy-btn:active:not(:disabled){ transform:scale(.98); }
-        .vy-btn:disabled { opacity:.5; cursor:not-allowed; }
+        .sb-card-glow { animation: cardDepth 6s ease-in-out infinite; }
 
-        /* ── Entrance ── */
+        /* ── Wave animation ── */
+        @keyframes waveFlow {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .sb-waves { animation: waveFlow 18s linear infinite; }
+
+        /* ── Gold halo ── */
+        @keyframes goldHalo {
+          0%,100% { opacity: 0.4; transform: scale(1); }
+          50%      { opacity: 0.7; transform: scale(1.08); }
+        }
+        .sb-halo { animation: goldHalo 4s ease-in-out infinite; }
+
+        /* ── Entrance animations ── */
         @keyframes fadeUp {
-          from { opacity:0; transform:translateY(18px); }
+          from { opacity:0; transform:translateY(16px); }
           to   { opacity:1; transform:translateY(0); }
         }
-        .fu1 { animation:fadeUp .7s .0s  ease both; }
-        .fu2 { animation:fadeUp .7s .18s ease both; }
-        .fu3 { animation:fadeUp .7s .34s ease both; }
-        .fu4 { animation:fadeUp .7s .48s ease both; }
-
-        /* ── Noise grain ── */
-        .grain::after {
-          content:''; position:absolute; inset:0; pointer-events:none;
-          background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
-          opacity:.5; mix-blend-mode:overlay;
-        }
+        .fu1 { animation:fadeUp .65s .00s ease both; }
+        .fu2 { animation:fadeUp .65s .15s ease both; }
+        .fu3 { animation:fadeUp .65s .30s ease both; }
+        .fu4 { animation:fadeUp .65s .45s ease both; }
       `}</style>
 
-      {/* ═══════════════════════════ PAGE ═══════════════════════════ */}
       <div
-        className="grain min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+        className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
         onMouseMove={onPageMove}
       >
-
-        {/* ── 1. Deep dark base ── */}
+        {/* ── 1. Deep ocean base ── */}
         <div className="absolute inset-0 z-0"
-          style={{ background:'linear-gradient(140deg,#0d0120 0%,#12022a 40%,#1a0330 70%,#0a0118 100%)' }} />
+          style={{ background:'linear-gradient(160deg, #060F1E 0%, #0A1628 35%, #0D1F3C 65%, #06111F 100%)' }} />
 
-        {/* ── 3. Aurora colour orbs (mouse-reactive parallax) ── */}
-        {ORBS.map((o, i) => {
-          const px = (mouse.x - 0.5) * o.depth * 80
-          const py = (mouse.y - 0.5) * o.depth * 55
+        {/* ── 2. Starfield / particle dots ── */}
+        <div className="absolute inset-0 z-[1] pointer-events-none opacity-30"
+          style={{
+            backgroundImage: 'radial-gradient(1px 1px at 20% 15%, #C9A84C88 0%, transparent 100%), radial-gradient(1px 1px at 65% 35%, #14B8A666 0%, transparent 100%), radial-gradient(1px 1px at 45% 70%, #C9A84C55 0%, transparent 100%), radial-gradient(1px 1px at 80% 55%, #14B8A644 0%, transparent 100%), radial-gradient(1px 1px at 10% 85%, #C9A84C44 0%, transparent 100%)',
+            backgroundSize: '100% 100%',
+          }} />
+
+        {/* ── 3. Teal / gold depth orbs ── */}
+        {BUBBLES.map((b, i) => {
+          const depth = [0.2, 0.35, 0.25, 0.45, 0.15][i]
+          const color = i % 2 === 0 ? '#C9A84C' : '#14B8A6'
+          const px = (mouse.x - 0.5) * depth * 70
+          const py = (mouse.y - 0.5) * depth * 50
           return (
             <div
-              key={o.id}
-              className={`orb-${o.id} absolute z-[2] pointer-events-none rounded-full`}
+              key={b.id}
+              className={`sb-bubble-${b.id} absolute z-[2] pointer-events-none rounded-full`}
               style={{
-                left:`${o.cx}%`, top:`${o.cy}%`,
-                width: o.size, height: o.size,
-                marginLeft: -o.size/2, marginTop: -o.size/2,
-                background:`radial-gradient(circle, ${o.color}55 0%, ${o.color}22 40%, transparent 70%)`,
-                filter:`blur(${o.blur}px)`,
+                left:`${b.cx}%`, top:`${b.cy}%`,
+                width: b.r*2, height: b.r*2,
+                marginLeft: -b.r, marginTop: -b.r,
+                background:`radial-gradient(circle, ${color}44 0%, ${color}18 40%, transparent 70%)`,
+                filter:`blur(${b.blur}px)`,
                 transform:`translate(${px}px,${py}px)`,
-                transition:'transform 0.25s ease-out',
+                transition:'transform 0.3s ease-out',
                 mixBlendMode:'screen',
               }}
             />
           )
         })}
 
-        {/* ── 4. Mouse spotlight ── */}
-        <div
-          className="absolute z-[3] pointer-events-none rounded-full"
-          style={{
-            width: 600, height: 600,
-            left: `${mouse.x * 100}%`, top: `${mouse.y * 100}%`,
-            marginLeft: -300, marginTop: -300,
-            background:'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)',
-            transition:'left 0.12s ease-out, top 0.12s ease-out',
-          }}
-        />
+        {/* ── 4. Animated wave band at bottom ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none overflow-hidden h-28 opacity-20">
+          <svg className="sb-waves" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg"
+            style={{ width:'200%', height:'100%' }}>
+            <path d="M0 40 C240 10 480 70 720 40 C960 10 1200 70 1440 40 C1680 10 1920 70 2160 40 V80 H0 Z"
+              fill="url(#waveGrad)" />
+            <defs>
+              <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"   stopColor="#C9A84C" />
+                <stop offset="50%"  stopColor="#14B8A6" />
+                <stop offset="100%" stopColor="#C9A84C" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
 
-        {/* ── 5. Vignette ── */}
-        <div className="absolute inset-0 z-[4] pointer-events-none"
-          style={{ background:'radial-gradient(ellipse at center,transparent 30%,rgba(4,1,14,0.75) 100%)' }} />
-
-        {/* ── 6. Thin chromatic grid lines (artistic texture) ── */}
-        <div className="absolute inset-0 z-[4] pointer-events-none opacity-[0.03]"
+        {/* ── 5. Subtle nautical grid texture ── */}
+        <div className="absolute inset-0 z-[4] pointer-events-none opacity-[0.025]"
           style={{
-            backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
-            backgroundSize:'80px 80px',
+            backgroundImage:'linear-gradient(rgba(201,168,76,1) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,1) 1px,transparent 1px)',
+            backgroundSize:'60px 60px',
           }} />
 
+        {/* ── 6. Vignette ── */}
+        <div className="absolute inset-0 z-[5] pointer-events-none"
+          style={{ background:'radial-gradient(ellipse at center, transparent 35%, rgba(6,15,30,0.7) 100%)' }} />
 
-        {/* ═════════ LOGIN CARD ═════════ */}
+        {/* ═══════════════ LOGIN CARD ═══════════════ */}
         <div
           className="relative z-10 w-full max-w-[400px]"
           onMouseMove={onCardMove}
           onMouseLeave={() => setTilt({ x:0, y:0 })}
           style={{
-            transform:`perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-            transition:'transform 0.28s ease-out',
+            transform:`perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+            transition:'transform 0.3s ease-out',
           }}
         >
-
-          {/* Animated gradient border wrapper */}
-          <div className="relative rounded-[30px] p-[1.5px]"
-            style={{ background:'linear-gradient(135deg,#7c3aed,#e91e8c,#ff8c42,#c084fc,#7c3aed)', backgroundSize:'300% 300%' }}>
-
-            {/* Rotating ring glow layer (sits under card content) */}
-            <div className="card-ring absolute -inset-[3px] rounded-[32px] opacity-40 pointer-events-none"
-              style={{
-                background:'conic-gradient(from 0deg,#7c3aed,#e91e8c,#ff8c42,#c084fc,#7c3aed)',
-                filter:'blur(12px)',
-              }} />
-
+          {/* Animated gold border */}
+          <div className="sb-card-border relative rounded-[28px] p-[1.5px]">
             {/* Card surface */}
             <div
-              className="card-glow relative rounded-[28px] px-8 py-9 overflow-hidden"
+              className="sb-card-glow relative rounded-[26px] px-8 py-9 overflow-hidden"
               style={{
-                background:'rgba(9,3,26,0.72)',
-                backdropFilter:'blur(36px)',
-                WebkitBackdropFilter:'blur(36px)',
+                background:'rgba(6,15,30,0.78)',
+                backdropFilter:'blur(40px)',
+                WebkitBackdropFilter:'blur(40px)',
               }}
             >
+              {/* Top highlight line */}
+              <div className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+                style={{ background:'linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)' }} />
+              {/* Bottom accent line */}
+              <div className="absolute bottom-0 left-1/4 right-1/4 h-px pointer-events-none"
+                style={{ background:'linear-gradient(90deg, transparent, rgba(20,184,166,0.3), transparent)' }} />
 
-              {/* Inner top highlight */}
-              <div className="absolute top-0 left-0 right-0 h-px"
-                style={{ background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)' }} />
-              {/* Inner bottom soft glow */}
-              <div className="absolute bottom-0 left-1/4 right-1/4 h-px"
-                style={{ background:'linear-gradient(90deg,transparent,rgba(233,30,140,0.3),transparent)' }} />
-
-              {/* ── Logo ── */}
-              <div className="fu1 relative flex flex-col items-center mb-7">
-                {/* Glow halo behind logo */}
-                <div className="logo-halo absolute w-32 h-32 rounded-full pointer-events-none"
-                  style={{ background:'radial-gradient(circle,rgba(233,30,140,0.35) 0%,rgba(124,58,237,0.2) 50%,transparent 70%)', filter:'blur(20px)' }} />
-                <div className="relative w-36 h-36 z-10" style={{ mixBlendMode:'screen' }}>
-                  <Image src="/vybline-logo.png" alt="Vybline" fill className="object-contain" priority />
+              {/* ── Logo / Brand ── */}
+              <div className="fu1 flex flex-col items-center mb-8">
+                {/* Gold halo */}
+                <div className="sb-halo absolute w-28 h-28 rounded-full pointer-events-none"
+                  style={{ background:'radial-gradient(circle, rgba(201,168,76,0.3) 0%, rgba(20,184,166,0.15) 55%, transparent 70%)', filter:'blur(18px)' }} />
+                {/* Icon mark */}
+                <div className="relative w-16 h-16 rounded-full flex items-center justify-center mb-3 z-10"
+                  style={{ background:'linear-gradient(135deg, rgba(201,168,76,0.15) 0%, rgba(20,184,166,0.1) 100%)', border:'1px solid rgba(201,168,76,0.35)' }}>
+                  <Waves className="w-7 h-7" style={{ color:'#C9A84C' }} />
                 </div>
-                <p className="text-white/38 text-[9.5px] tracking-[0.45em] uppercase font-semibold mt-[-4px]">
-                  Create · Mix · Publish
+                <h1 className="sb-heading text-white text-2xl font-bold tracking-wide z-10">
+                  VideoForge
+                </h1>
+                <p style={{ color:'rgba(201,168,76,0.55)', fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', marginTop:'4px' }}>
+                  Create · Edit · Publish
                 </p>
               </div>
 
               {/* ── Heading ── */}
-              <div className="fu2 mb-6 text-center">
-                <h2 className="text-2xl font-black text-white mb-1 tracking-tight">
-                  {isSignUp ? 'Get started' : 'Welcome back'}
+              <div className="fu2 mb-7 text-center">
+                <h2 className="sb-heading text-xl font-semibold text-white mb-1">
+                  {isSignUp ? 'Create Account' : 'Welcome Back'}
                 </h2>
-                <p style={{ color:'rgba(255,255,255,0.36)', fontSize:'13.5px' }}>
-                  {isSignUp ? 'Create your Vybline account.' : 'Sign in to your studio.'}
+                <p style={{ color:'rgba(240,230,208,0.38)', fontSize:'13px' }}>
+                  {isSignUp ? 'Join your creative studio.' : 'Sign in to your studio.'}
                 </p>
               </div>
 
@@ -260,23 +237,23 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit} className="fu3 space-y-4">
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest font-semibold mb-1.5"
-                    style={{ color:'rgba(255,255,255,0.36)' }}>Email</label>
+                    style={{ color:'rgba(201,168,76,0.6)' }}>Email</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                      style={{ color:'rgba(255,255,255,0.3)' }} />
+                      style={{ color:'rgba(201,168,76,0.4)' }} />
                     <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
-                      required placeholder="you@example.com" className="vy-input" />
+                      required placeholder="you@example.com" className="sb-input" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest font-semibold mb-1.5"
-                    style={{ color:'rgba(255,255,255,0.36)' }}>Password</label>
+                    style={{ color:'rgba(201,168,76,0.6)' }}>Password</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                      style={{ color:'rgba(255,255,255,0.3)' }} />
+                      style={{ color:'rgba(201,168,76,0.4)' }} />
                     <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
-                      required placeholder="••••••••" className="vy-input" />
+                      required placeholder="••••••••" className="sb-input" />
                   </div>
                 </div>
 
@@ -284,11 +261,15 @@ export default function LoginPage() {
                   <div className={`text-sm px-4 py-3 rounded-xl ${
                     message.type==='error'
                       ? 'bg-red-500/10 border border-red-500/25 text-red-300'
-                      : 'bg-green-500/10 border border-green-500/25 text-green-300'
-                  }`}>{message.text}</div>
+                      : 'border text-emerald-300'
+                  }`}
+                  style={message.type==='success' ? { borderColor:'rgba(20,184,166,0.3)', background:'rgba(20,184,166,0.08)' } : {}}>
+                    {message.text}
+                  </div>
                 )}
 
-                <button type="submit" disabled={loading} className="vy-btn">
+                <button type="submit" disabled={loading}
+                  className="sb-btn-primary w-full py-3.5 rounded-xl flex items-center justify-center gap-2">
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isSignUp ? 'Create Account' : 'Sign In'}
                 </button>
@@ -296,20 +277,20 @@ export default function LoginPage() {
 
               {/* ── Divider ── */}
               <div className="fu4 flex items-center gap-3 my-5">
-                <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.07)' }} />
-                <span className="text-[10px] uppercase tracking-wider" style={{ color:'rgba(255,255,255,0.22)' }}>or</span>
-                <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.07)' }} />
+                <div className="flex-1 h-px" style={{ background:'rgba(201,168,76,0.12)' }} />
+                <span className="text-[10px] uppercase tracking-wider" style={{ color:'rgba(240,230,208,0.22)' }}>or</span>
+                <div className="flex-1 h-px" style={{ background:'rgba(201,168,76,0.12)' }} />
               </div>
 
               {/* ── Toggle ── */}
-              <p className="fu4 text-center text-sm" style={{ color:'rgba(255,255,255,0.32)' }}>
+              <p className="fu4 text-center text-sm" style={{ color:'rgba(240,230,208,0.32)' }}>
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   onClick={() => { setIsSignUp(!isSignUp); setMessage(null) }}
-                  className="font-bold transition-colors"
-                  style={{ color:'#E91E8C' }}
-                  onMouseEnter={e=>(e.currentTarget.style.color='#ff4dac')}
-                  onMouseLeave={e=>(e.currentTarget.style.color='#E91E8C')}
+                  className="font-semibold transition-colors"
+                  style={{ color:'#C9A84C' }}
+                  onMouseEnter={e=>(e.currentTarget.style.color='#E8C86A')}
+                  onMouseLeave={e=>(e.currentTarget.style.color='#C9A84C')}
                 >
                   {isSignUp ? 'Sign in' : 'Sign up'}
                 </button>
@@ -318,13 +299,12 @@ export default function LoginPage() {
             </div>{/* /card surface */}
           </div>{/* /border wrapper */}
 
-          <p className="text-center text-[10px] mt-5 tracking-widest uppercase"
-            style={{ color:'rgba(255,255,255,0.14)' }}>
-            © 2025 Vybline · Short-form Content Engine
+          <p className="text-center text-[9px] mt-5 tracking-[0.4em] uppercase"
+            style={{ color:'rgba(201,168,76,0.2)' }}>
+            © 2025 VideoForge · Short-form Content Studio
           </p>
 
         </div>{/* /card outer */}
-
       </div>
     </>
   )

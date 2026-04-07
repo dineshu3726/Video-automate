@@ -96,10 +96,11 @@ export default function DownloaderTab() {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Hero */}
       <div className="text-center space-y-2">
-        <div className="w-14 h-14 bg-red-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Youtube className="w-7 h-7 text-red-400" />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          style={{ background:'rgba(201,168,76,0.12)', border:'1px solid rgba(201,168,76,0.2)' }}>
+          <Youtube className="w-7 h-7" style={{ color:'#C9A84C' }} />
         </div>
-        <h1 className="text-2xl font-bold text-text">YouTube Video Downloader</h1>
+        <h1 className="sb-heading text-2xl font-bold text-text">YouTube Video Downloader</h1>
         <p className="text-muted text-sm">Paste a YouTube URL to download the video in your preferred quality</p>
       </div>
 
@@ -110,12 +111,15 @@ export default function DownloaderTab() {
           value={url}
           onChange={(e) => { setUrl(e.target.value); setError(null); setInfo(null) }}
           placeholder="https://www.youtube.com/watch?v=..."
-          className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-text placeholder-muted text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition"
+          className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-text placeholder-muted text-sm focus:outline-none transition"
+          style={{ outline:'none' }}
+          onFocus={e => { e.currentTarget.style.borderColor='rgba(201,168,76,0.55)'; e.currentTarget.style.boxShadow='0 0 0 3px rgba(201,168,76,0.1)' }}
+          onBlur={e => { e.currentTarget.style.borderColor=''; e.currentTarget.style.boxShadow='' }}
         />
         <button
           type="submit"
           disabled={loading || !url.trim()}
-          className="bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 flex-shrink-0"
+          className="sb-btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 rounded-xl flex items-center gap-2 flex-shrink-0"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
           {loading ? 'Fetching...' : 'Fetch'}
@@ -189,7 +193,7 @@ export default function DownloaderTab() {
                     <button
                       onClick={() => handleDownload(f)}
                       disabled={downloading !== null}
-                      className="flex items-center gap-1.5 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      className="sb-btn-primary flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs px-3 py-1.5 rounded-lg"
                     >
                       {downloading === f.itag
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -207,7 +211,7 @@ export default function DownloaderTab() {
           {audioFormats.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Music className="w-4 h-4 text-emerald-400" />
+                <Music className="w-4 h-4" style={{ color:'#14B8A6' }} />
                 <h3 className="text-sm font-semibold text-text">Audio Only</h3>
               </div>
               <div className="space-y-2">
@@ -226,7 +230,8 @@ export default function DownloaderTab() {
                     <button
                       onClick={() => handleDownload(f)}
                       disabled={downloading !== null}
-                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      className="flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+                      style={{ background:'rgba(20,184,166,0.15)', border:'1px solid rgba(20,184,166,0.3)', color:'#14B8A6' }}
                     >
                       {downloading === f.itag
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

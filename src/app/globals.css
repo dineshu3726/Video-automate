@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
-/* ── Vybline Light Mode (default) ── */
+/* ── Seabud Light Mode (default) ── */
 :root {
-  --bg: #F8F7FF;
+  --bg: #F5EFE3;
   --bg-surface: #FFFFFF;
-  --bg-surface2: #EEEAFF;
-  --text: #0B0B14;
-  --text-muted: #6B6B8D;
-  --primary: #E91E8C;
-  --primary-hover: #C4176F;
-  --accent: #7C3AED;
-  --border: #E2DEFC;
+  --bg-surface2: #EDE5D5;
+  --text: #0D1B35;
+  --text-muted: #5A6E8A;
+  --primary: #B8923A;
+  --primary-hover: #C9A84C;
+  --accent: #0D9488;
+  --border: #D8CCBA;
 }
 
-/* ── Vybline Dark Mode ── */
+/* ── Seabud Dark Mode (deep ocean) ── */
 .dark {
-  --bg: #0B0B14;
-  --bg-surface: #13131F;
-  --bg-surface2: #1C1C2E;
-  --text: #F0F0FF;
-  --text-muted: #7A7A9D;
-  --primary: #E91E8C;
-  --primary-hover: #C4176F;
-  --accent: #7C3AED;
-  --border: #252540;
+  --bg: #060F1E;
+  --bg-surface: #0D1B35;
+  --bg-surface2: #142444;
+  --text: #F0E6D0;
+  --text-muted: #7A95B8;
+  --primary: #C9A84C;
+  --primary-hover: #E8C86A;
+  --accent: #14B8A6;
+  --border: #1A2E52;
 }
 
 @theme inline {
@@ -37,6 +37,7 @@
   --color-accent: var(--accent);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -44,4 +45,69 @@ body {
   background: var(--bg);
   color: var(--text);
   transition: background 0.2s, color 0.2s;
+}
+
+/* ── Seabud utility classes ── */
+.sb-heading {
+  font-family: var(--font-playfair), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.sb-gold-gradient {
+  background: linear-gradient(135deg, #C9A84C 0%, #E8C86A 50%, #C9A84C 100%);
+}
+
+.sb-ocean-gradient {
+  background: linear-gradient(160deg, #060F1E 0%, #0D1B35 40%, #0A2040 70%, #060F1E 100%);
+}
+
+.sb-btn-primary {
+  background: linear-gradient(135deg, #B8923A 0%, #C9A84C 50%, #E8C86A 100%);
+  background-size: 200% 200%;
+  color: #060F1E;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 0.25s, transform 0.15s;
+  box-shadow: 0 6px 24px rgba(201,168,76,0.35);
+}
+.sb-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 10px 36px rgba(201,168,76,0.55);
+  transform: translateY(-1px);
+}
+.sb-btn-primary:active:not(:disabled) { transform: scale(0.98); }
+.sb-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sb-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,168,76,0.18);
+  border-radius: 10px;
+  padding: 12px 14px 12px 40px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.sb-input::placeholder { color: rgba(240,230,208,0.3); }
+.sb-input:focus {
+  border-color: rgba(201,168,76,0.55);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+
+/* ── Wave divider SVG pattern ── */
+.sb-wave-border {
+  position: relative;
+}
+.sb-wave-border::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C9A84C44, #C9A84C, #C9A84C44, transparent);
 }
