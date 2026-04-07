@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, Loader2, Waves } from 'lucide-react'
+import { Mail, Lock, Loader2, Waves, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 const BUBBLES = [
   { id:1, cx:12,  cy:30,  r:260, blur:90,  dur:'26s', delay:'0s'   },
@@ -299,7 +300,21 @@ export default function LoginPage() {
             </div>{/* /card surface */}
           </div>{/* /border wrapper */}
 
-          <p className="text-center text-[9px] mt-5 tracking-[0.4em] uppercase"
+          {/* Browse as guest */}
+          <div className="flex justify-center mt-5">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs transition-colors"
+              style={{ color:'rgba(201,168,76,0.45)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#C9A84C')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.45)')}
+            >
+              <ArrowLeft className="w-3 h-3" />
+              Browse without signing in
+            </Link>
+          </div>
+
+          <p className="text-center text-[9px] mt-4 tracking-[0.4em] uppercase"
             style={{ color:'rgba(201,168,76,0.2)' }}>
             © 2025 VideoForge · Short-form Content Studio
           </p>

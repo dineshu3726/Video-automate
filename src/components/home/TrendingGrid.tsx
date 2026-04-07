@@ -354,13 +354,22 @@ export default function TrendingGrid() {
         )}
 
         {error && (
-          <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <div className="text-sm px-5 py-3 rounded-xl" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', color:'#fca5a5' }}>
-              {error}
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{ background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)' }}>
+              <Waves className="w-7 h-7" style={{ color:'#C9A84C' }} />
+            </div>
+            <div>
+              <p className="sb-heading text-white font-semibold mb-1">Couldn't load trending videos</p>
+              <p className="text-sm max-w-xs" style={{ color:'#7A95B8' }}>
+                {error.includes('not configured')
+                  ? 'The YouTube API key is not set up yet. Add YOUTUBE_DATA_API_KEY to your environment variables.'
+                  : error}
+              </p>
             </div>
             <button
               onClick={() => fetchVideos(region)}
-              className="sb-btn-primary px-4 py-2 rounded-lg text-xs"
+              className="sb-btn-primary px-5 py-2.5 rounded-xl text-xs"
             >
               Try again
             </button>
