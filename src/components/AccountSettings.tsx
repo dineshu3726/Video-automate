@@ -215,13 +215,13 @@ export default function AccountSettings({
           </div>
         </div>
 
-        {/* VideoForge logo */}
+        {/* Vybeline logo */}
         <div className="flex items-center gap-2 pt-4 border-t border-border">
           <div className="w-6 h-6 rounded-md flex items-center justify-center"
             style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)' }}>
             <Video className="w-3 h-3" style={{ color:'#060F1E' }} />
           </div>
-          <span className="sb-heading text-muted/50 text-xs">VideoForge</span>
+          <span className="sb-heading text-muted/50 text-xs">Vybeline</span>
         </div>
       </main>
     </div>

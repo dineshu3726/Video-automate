@@ -37,7 +37,7 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
             <Waves className="w-3.5 h-3.5" style={{ color:'#060F1E' }} />
           </div>
           <span className="sb-heading text-text font-bold text-sm hidden sm:block">
-            Video<span style={{ color:'var(--color-primary)' }}>Forge</span>
+            Vyb<span style={{ color:'var(--color-primary)' }}>eline</span>
           </span>
         </div>
 

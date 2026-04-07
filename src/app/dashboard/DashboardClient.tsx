@@ -8,21 +8,19 @@ import Link from 'next/link'
 import FeedTab from '@/components/tabs/FeedTab'
 import StudioTab from '@/components/tabs/StudioTab'
 import DownloaderTab from '@/components/tabs/DownloaderTab'
-import ShortsPlayer from '@/components/feed/ShortsPlayer'
 import VeoPoller from '@/components/VeoPoller'
 import ThemeToggle from '@/components/ThemeToggle'
 import {
   LogOut, LayoutGrid, Clock, CheckCircle2,
-  Settings, Play, Tv, Sparkles, Download, Waves,
+  Settings, Tv, Sparkles, Download, Waves, Home,
 } from 'lucide-react'
 
-type Tab = 'player' | 'feed' | 'studio' | 'downloader'
+type Tab = 'studio' | 'feed' | 'downloader'
 
 const TABS = [
-  { id: 'player'     as Tab, label: 'Player',     icon: Play },
-  { id: 'feed'       as Tab, label: 'Feed',       icon: Tv },
   { id: 'studio'     as Tab, label: 'Studio',     icon: Sparkles },
-  { id: 'downloader' as Tab, label: 'Downloader', icon: Download },
+  { id: 'feed'       as Tab, label: 'Feed',        icon: Tv },
+  { id: 'downloader' as Tab, label: 'Downloader',  icon: Download },
 ]
 
 interface Props {
@@ -33,7 +31,7 @@ interface Props {
 
 export default function DashboardClient({ user, initialJobs, ytConnected }: Props) {
   const [jobs, setJobs] = useState<VideoJob[]>(initialJobs)
-  const [activeTab, setActiveTab] = useState<Tab>('player')
+  const [activeTab, setActiveTab] = useState<Tab>('studio')
   const supabase = createClient()
 
   const fetchJobs = useCallback(async () => {
@@ -59,7 +57,7 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
 
   async function handleSignOut() {
     await supabase.auth.signOut()
-    window.location.href = '/login'
+    window.location.href = '/'
   }
 
   const stats = {
@@ -74,19 +72,27 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
       {/* ── Header ── */}
       <header className="sb-wave-border border-b border-border bg-surface/90 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Logo */}
+          {/* Logo + Home link */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 50%, #E8C86A 100%)', boxShadow:'0 4px 14px rgba(201,168,76,0.4)' }}>
-              <Waves className="w-4 h-4" style={{ color:'#060F1E' }} />
-            </div>
-            <span className="sb-heading text-text font-bold text-xl tracking-wide">
-              Video<span style={{ color:'var(--color-primary)' }}>Forge</span>
-            </span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background:'linear-gradient(135deg,#B8923A,#C9A84C)', boxShadow:'0 4px 14px rgba(201,168,76,0.4)' }}>
+                <Waves className="w-4 h-4" style={{ color:'#060F1E' }} />
+              </div>
+              <span className="sb-heading text-text font-bold text-xl tracking-wide group-hover:opacity-80 transition">
+                Vyb<span style={{ color:'var(--color-primary)' }}>eline</span>
+              </span>
+            </Link>
+            <span className="hidden sm:block text-muted text-xs px-2 py-0.5 rounded border border-border">Studio</span>
           </div>
 
           {/* Right */}
           <div className="flex items-center gap-2">
+            <Link href="/"
+              className="flex items-center gap-1.5 text-muted hover:text-text text-sm transition px-3 py-1.5 rounded-lg hover:bg-surface2">
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Home</span>
+            </Link>
             <span className="text-muted text-sm hidden sm:block">{user.email}</span>
             <Link href="/dashboard/settings"
               className="p-2 text-muted hover:text-text rounded-lg hover:bg-surface2 transition">
@@ -111,21 +117,18 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
             const active = activeTab === tab.id
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative overflow-hidden ${
-                  active ? 'shadow-sm' : 'hover:bg-surface2'
-                }`}
+                className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative overflow-hidden"
                 style={active ? {
-                  background:'linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(20,184,166,0.08) 100%)',
+                  background:'linear-gradient(135deg,rgba(201,168,76,0.1),rgba(20,184,166,0.08))',
                   border:'1px solid rgba(201,168,76,0.22)',
-                } : {}}
-              >
-                <Icon className={`w-4 h-4`} style={{ color: active ? 'var(--color-primary)' : 'var(--color-muted)' }} />
-                <span className={`text-xs font-semibold`} style={{ color: active ? 'var(--color-text)' : 'var(--color-muted)' }}>
+                } : {}}>
+                <Icon className="w-4 h-4" style={{ color: active ? 'var(--color-primary)' : 'var(--color-muted)' }} />
+                <span className="text-xs font-semibold" style={{ color: active ? 'var(--color-text)' : 'var(--color-muted)' }}>
                   {tab.label}
                 </span>
                 {active && (
                   <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                    style={{ background:'linear-gradient(90deg, #B8923A, #C9A84C, #E8C86A)' }} />
+                    style={{ background:'linear-gradient(90deg,#B8923A,#C9A84C,#E8C86A)' }} />
                 )}
               </button>
             )
@@ -133,33 +136,19 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
         </div>
 
         {/* ── Tab Content ── */}
-        {activeTab === 'player' && (
-          <div className="py-2">
-            <ShortsPlayer ytConnected={ytConnected} />
-          </div>
-        )}
-
-        {activeTab === 'feed' && (
-          <div className="bg-surface border border-border rounded-2xl p-6">
-            <FeedTab ytConnected={ytConnected} />
-          </div>
-        )}
-
         {activeTab === 'studio' && (
           <>
             <div className="grid grid-cols-3 gap-4 mb-6">
               {[
-                { label: 'Total Jobs',   value: stats.total,    icon: LayoutGrid,   accent: 'var(--color-accent)' },
-                { label: 'In Progress',  value: stats.pending,  icon: Clock,        accent: 'var(--color-primary)' },
-                { label: 'Approved',     value: stats.approved, icon: CheckCircle2, accent: '#34d399' },
+                { label:'Total Jobs',   value:stats.total,    icon:LayoutGrid,   accent:'var(--color-accent)' },
+                { label:'In Progress',  value:stats.pending,  icon:Clock,        accent:'var(--color-primary)' },
+                { label:'Approved',     value:stats.approved, icon:CheckCircle2, accent:'#34d399' },
               ].map(({ label, value, icon: Icon, accent }) => (
-                <div key={label}
-                  className="bg-surface border border-border rounded-xl p-4 transition"
-                  style={{ borderColor:'var(--color-border)' }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border)')}>
+                <div key={label} className="bg-surface border border-border rounded-xl p-4 transition"
+                  onMouseEnter={e => (e.currentTarget.style.borderColor='rgba(201,168,76,0.25)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor='var(--color-border)')}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-4 h-4" style={{ color: accent }} />
+                    <Icon className="w-4 h-4" style={{ color:accent }} />
                     <span className="text-muted text-xs">{label}</span>
                   </div>
                   <p className="sb-heading text-2xl font-bold text-text">{value}</p>
@@ -170,6 +159,12 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
               <StudioTab user={user} initialJobs={jobs} />
             </div>
           </>
+        )}
+
+        {activeTab === 'feed' && (
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <FeedTab ytConnected={ytConnected} />
+          </div>
         )}
 
         {activeTab === 'downloader' && (

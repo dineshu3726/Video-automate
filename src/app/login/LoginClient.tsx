@@ -217,10 +217,10 @@ export default function LoginPage() {
                   <Waves className="w-7 h-7" style={{ color:'#C9A84C' }} />
                 </div>
                 <h1 className="sb-heading text-white text-2xl font-bold tracking-wide z-10">
-                  VideoForge
+                  Vyb<span style={{ color:'#C9A84C' }}>eline</span>
                 </h1>
                 <p style={{ color:'rgba(201,168,76,0.55)', fontSize:'9px', letterSpacing:'0.5em', textTransform:'uppercase', marginTop:'4px' }}>
-                  Create · Edit · Publish
+                  Watch · Create · Publish
                 </p>
               </div>
 
@@ -316,7 +316,7 @@ export default function LoginPage() {
 
           <p className="text-center text-[9px] mt-4 tracking-[0.4em] uppercase"
             style={{ color:'rgba(201,168,76,0.2)' }}>
-            © 2025 VideoForge · Short-form Content Studio
+            © 2025 Vybeline · Watch · Create · Publish
           </p>
 
         </div>{/* /card outer */}
