@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
+import { getAppOrigin } from '@/lib/appUrl'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const origin = getAppOrigin(request)
+
   const params = new URLSearchParams({
     client_id: process.env.INSTAGRAM_APP_ID!,
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`,
+    redirect_uri: `${origin}/api/auth/instagram/callback`,
     scope: [
       'instagram_basic',
       'instagram_content_publish',

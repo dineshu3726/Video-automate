@@ -6,7 +6,7 @@ export interface YouTubeToken {
 }
 
 /** Exchanges an auth code for YouTube tokens. */
-export async function exchangeYouTubeCode(code: string): Promise<YouTubeToken> {
+export async function exchangeYouTubeCode(code: string, redirectUri: string): Promise<YouTubeToken> {
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -14,7 +14,7 @@ export async function exchangeYouTubeCode(code: string): Promise<YouTubeToken> {
       code,
       client_id: process.env.YOUTUBE_CLIENT_ID!,
       client_secret: process.env.YOUTUBE_CLIENT_SECRET!,
-      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/youtube/callback`,
+      redirect_uri: redirectUri,
       grant_type: 'authorization_code',
     }),
   })

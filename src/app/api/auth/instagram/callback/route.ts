@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { exchangeInstagramCode } from '@/lib/instagram'
+import { getAppOrigin } from '@/lib/appUrl'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
+  const { searchParams } = new URL(request.url)
+  const origin = getAppOrigin(request)
+  const code  = searchParams.get('code')
   const error = searchParams.get('error')
 
   if (error || !code) {
@@ -17,13 +19,14 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.redirect(`${origin}/login`)
 
   try {
-    const token = await exchangeInstagramCode(code)
+    // Pass the same origin-derived redirect_uri used during initiation
+    const token = await exchangeInstagramCode(code, `${origin}/api/auth/instagram/callback`)
     const admin = createAdminClient()
 
+    // upsert so new users (no profiles row yet) also get their token saved
     await admin
       .from('profiles')
-      .update({ ig_token: JSON.stringify(token) })
-      .eq('id', user.id)
+      .upsert({ id: user.id, ig_token: JSON.stringify(token) }, { onConflict: 'id' })
 
     return NextResponse.redirect(`${origin}/dashboard/settings?connected=instagram`)
   } catch (err) {

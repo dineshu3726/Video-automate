@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server'
+import { getAppOrigin } from '@/lib/appUrl'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const origin = getAppOrigin(request)
+
   const params = new URLSearchParams({
     client_id: process.env.YOUTUBE_CLIENT_ID!,
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/youtube/callback`,
+    redirect_uri: `${origin}/api/auth/youtube/callback`,
     response_type: 'code',
     scope: [
       'https://www.googleapis.com/auth/youtube.upload',
       'https://www.googleapis.com/auth/youtube.readonly',
     ].join(' '),
     access_type: 'offline',
-    prompt: 'consent', // ensures we always get a refresh_token
+    prompt: 'consent', // ensures refresh_token is always returned
   })
 
   return NextResponse.redirect(

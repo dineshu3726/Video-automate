@@ -7,8 +7,7 @@ export interface InstagramToken {
 }
 
 /** Exchanges a short-lived code for a long-lived user token + IG account IDs. */
-export async function exchangeInstagramCode(code: string): Promise<InstagramToken> {
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`
+export async function exchangeInstagramCode(code: string, redirectUri: string): Promise<InstagramToken> {
 
   // Step 1 — short-lived token
   const shortRes = await fetch(
