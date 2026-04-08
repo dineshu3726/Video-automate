@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { encodeVideoId } from '@/lib/videoToken'
 
 const VALID_REGIONS = new Set([
   'IN','US','GB','AU','CA','FR','DE','JP','KR','BR','ES','MX','RU',
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
 
   const items = (data.items ?? []).map((v: any) => ({
     videoId: v.id,
+    token: encodeVideoId(v.id),
     title: v.snippet.title,
     channelTitle: v.snippet.channelTitle,
     thumbnail: v.snippet.thumbnails?.maxres?.url

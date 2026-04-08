@@ -68,6 +68,7 @@ function timeAgo(iso: string) {
 
 export interface VideoItem {
   videoId: string
+  token: string          // AES-encrypted videoId — used for proxy stream URL
   title: string
   channelTitle: string
   thumbnail: string
@@ -166,13 +167,13 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
 
         {/* ── Main player column ── */}
         <div className="flex-1 min-w-0">
-          {/* Video player */}
+          {/* Video player — routed through our proxy to mask origin */}
           <div className="w-full aspect-video rounded-xl overflow-hidden"
             style={{ background:'#000' }}>
             <iframe
               key={current.videoId}
-              src={`https://www.youtube.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1`}
-              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              src={`/api/stream/${current.token}`}
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
               allowFullScreen
               className="w-full h-full"
             />
