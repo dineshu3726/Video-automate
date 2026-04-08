@@ -12,8 +12,9 @@ import VeoPoller from '@/components/VeoPoller'
 import ThemeToggle from '@/components/ThemeToggle'
 import {
   LogOut, LayoutGrid, Clock, CheckCircle2,
-  Settings, Tv, Sparkles, Download, Waves, Home,
+  Settings, Tv, Sparkles, Download, Home,
 } from 'lucide-react'
+import { VybLiNeIcon } from '@/components/VybLineLogo'
 
 type Tab = 'studio' | 'feed' | 'downloader'
 
@@ -75,12 +76,9 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
           {/* Logo + Home link */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background:'linear-gradient(135deg,#B8923A,#C9A84C)', boxShadow:'0 4px 14px rgba(201,168,76,0.4)' }}>
-                <Waves className="w-4 h-4" style={{ color:'#060F1E' }} />
-              </div>
+              <VybLiNeIcon size={36} />
               <span className="sb-heading text-text font-bold text-xl tracking-wide group-hover:opacity-80 transition">
-                Vyb<span style={{ color:'var(--color-primary)' }}>LiNe</span>
+                <span style={{ color:'#00C8E0' }}>Vyb</span>LiNe
               </span>
             </Link>
             <span className="hidden sm:block text-muted text-xs px-2 py-0.5 rounded border border-border">Studio</span>
@@ -128,7 +126,7 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
                 </span>
                 {active && (
                   <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                    style={{ background:'linear-gradient(90deg,#B8923A,#C9A84C,#E8C86A)' }} />
+                    style={{ background:'linear-gradient(90deg,#0097B2,#00C8E0,#E91E8C)' }} />
                 )}
               </button>
             )

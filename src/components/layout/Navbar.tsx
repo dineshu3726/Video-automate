@@ -1,9 +1,10 @@
 'use client'
 import { User } from '@supabase/supabase-js'
-import { LogOut, Settings, Tv, Download, Clapperboard, Waves } from 'lucide-react'
+import { LogOut, Settings, Tv, Download, Clapperboard } from 'lucide-react'
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
+import { VybLiNeIcon } from '@/components/VybLineLogo'
 
 export type AppTab = 'feed' | 'downloader' | 'studio'
 
@@ -32,12 +33,9 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
         {/* Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', boxShadow:'0 2px 8px rgba(201,168,76,0.4)' }}>
-            <Waves className="w-3.5 h-3.5" style={{ color:'#060F1E' }} />
-          </div>
+          <VybLiNeIcon size={28} />
           <span className="sb-heading text-text font-bold text-sm hidden sm:block">
-            Vyb<span style={{ color:'var(--color-primary)' }}>LiNe</span>
+            <span style={{ color:'#00C8E0' }}>Vyb</span>LiNe
           </span>
         </div>
 
@@ -82,7 +80,7 @@ export default function Navbar({ user, activeTab, onTabChange }: Props) {
             <LogOut className="w-4 h-4" />
           </button>
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', color:'#060F1E' }}>
+            style={{ background:'linear-gradient(135deg, #0097B2 0%, #00C8E0 100%)', color:'#fff' }}>
             {user.email?.[0]?.toUpperCase() ?? 'U'}
           </div>
         </div>

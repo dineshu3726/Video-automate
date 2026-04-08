@@ -117,7 +117,7 @@ export default function AccountSettings({
           <h2 className="sb-heading text-xs font-semibold text-muted uppercase tracking-wider mb-3">Account</h2>
           <div className="bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)', color:'#060F1E' }}>
+              style={{ background:'linear-gradient(135deg, #0097B2 0%, #00C8E0 100%)', color:'#fff' }}>
               {email[0]?.toUpperCase()}
             </div>
             <span className="text-muted text-sm">{email}</span>
@@ -218,8 +218,8 @@ export default function AccountSettings({
         {/* Vybeline logo */}
         <div className="flex items-center gap-2 pt-4 border-t border-border">
           <div className="w-6 h-6 rounded-md flex items-center justify-center"
-            style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)' }}>
-            <Video className="w-3 h-3" style={{ color:'#060F1E' }} />
+            style={{ background:'linear-gradient(135deg, #0097B2 0%, #00C8E0 100%)' }}>
+            <Video className="w-3 h-3" style={{ color:'#fff' }} />
           </div>
           <span className="sb-heading text-muted/50 text-xs">VybLiNe</span>
         </div>

@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
-/* ── Seabud Light Mode (default) ── */
+/* ── VybLiNe Light Mode ── */
 :root {
-  --bg: #F5EFE3;
+  --bg: #F4F7FF;
   --bg-surface: #FFFFFF;
-  --bg-surface2: #EDE5D5;
-  --text: #0D1B35;
-  --text-muted: #5A6E8A;
-  --primary: #B8923A;
-  --primary-hover: #C9A84C;
-  --accent: #0D9488;
-  --border: #D8CCBA;
+  --bg-surface2: #EBF0FF;
+  --text: #0D1117;
+  --text-muted: #556677;
+  --primary: #0097B2;
+  --primary-hover: #00C8E0;
+  --accent: #D01B7A;
+  --border: rgba(0,151,178,0.2);
 }
 
-/* ── Seabud Dark Mode (deep ocean) ── */
+/* ── VybLiNe Dark Mode ── */
 .dark {
-  --bg: #060F1E;
-  --bg-surface: #0D1B35;
-  --bg-surface2: #142444;
-  --text: #F0E6D0;
-  --text-muted: #7A95B8;
-  --primary: #C9A84C;
-  --primary-hover: #E8C86A;
-  --accent: #14B8A6;
-  --border: #1A2E52;
+  --bg: #0A0B18;
+  --bg-surface: #12142A;
+  --bg-surface2: #1A1D3A;
+  --text: #F0F4FF;
+  --text-muted: #8899BB;
+  --primary: #00C8E0;
+  --primary-hover: #33D6EC;
+  --accent: #E91E8C;
+  --border: rgba(0,200,224,0.15);
 }
 
 @theme inline {
@@ -47,24 +47,16 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
-/* ── Seabud utility classes ── */
+/* ── VybLiNe utility classes ── */
 .sb-heading {
   font-family: var(--font-playfair), Georgia, serif;
   letter-spacing: -0.02em;
 }
 
-.sb-gold-gradient {
-  background: linear-gradient(135deg, #C9A84C 0%, #E8C86A 50%, #C9A84C 100%);
-}
-
-.sb-ocean-gradient {
-  background: linear-gradient(160deg, #060F1E 0%, #0D1B35 40%, #0A2040 70%, #060F1E 100%);
-}
-
 .sb-btn-primary {
-  background: linear-gradient(135deg, #B8923A 0%, #C9A84C 50%, #E8C86A 100%);
+  background: linear-gradient(135deg, #0097B2 0%, #00C8E0 50%, #33D6EC 100%);
   background-size: 200% 200%;
-  color: #060F1E;
+  color: #ffffff;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -72,19 +64,20 @@ body {
   border: none;
   cursor: pointer;
   transition: box-shadow 0.25s, transform 0.15s;
-  box-shadow: 0 6px 24px rgba(201,168,76,0.35);
+  box-shadow: 0 6px 24px rgba(0,200,224,0.35);
 }
 .sb-btn-primary:hover:not(:disabled) {
-  box-shadow: 0 10px 36px rgba(201,168,76,0.55);
+  box-shadow: 0 10px 36px rgba(0,200,224,0.55);
   transform: translateY(-1px);
 }
 .sb-btn-primary:active:not(:disabled) { transform: scale(0.98); }
 .sb-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Login inputs — always on dark bg so always white text */
 .sb-input {
   width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(201,168,76,0.18);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(0,200,224,0.25);
   border-radius: 10px;
   padding: 12px 14px 12px 40px;
   color: #ffffff;
@@ -92,16 +85,32 @@ body {
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.sb-input::placeholder { color: rgba(255,255,255,0.3); }
+.sb-input::placeholder { color: rgba(255,255,255,0.35); }
 .sb-input:focus {
-  border-color: rgba(201,168,76,0.55);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  border-color: rgba(0,200,224,0.6);
+  box-shadow: 0 0 0 3px rgba(0,200,224,0.12);
 }
 
-/* ── Wave divider SVG pattern ── */
-.sb-wave-border {
-  position: relative;
+/* General inputs (dashboard, settings — respect theme) */
+.vl-input {
+  width: 100%;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+.vl-input::placeholder { color: var(--text-muted); }
+.vl-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,200,224,0.12);
+}
+
+/* Wave accent border */
+.sb-wave-border { position: relative; }
 .sb-wave-border::after {
   content: '';
   position: absolute;
@@ -109,5 +118,5 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #C9A84C44, #C9A84C, #C9A84C44, transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,200,224,0.5), #E91E8C44, rgba(0,200,224,0.5), transparent);
 }
