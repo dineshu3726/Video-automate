@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["latin"], weight: ["400","500","600","700","800","900"] });
 
 export const metadata: Metadata = {
-  title: "Vybeline — Watch. Create. Publish.",
+  title: "VybLiNe — Watch. Create. Publish.",
   description: "Discover trending videos worldwide and publish short-form content to YouTube",
 };
 

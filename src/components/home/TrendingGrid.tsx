@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { Loader2, X, ChevronDown, Eye, ThumbsUp, Waves, Settings, LogOut, Clapperboard } from 'lucide-react'
+import { Loader2, X, ChevronDown, Eye, ThumbsUp, Waves, Clapperboard, Search, ArrowLeft } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
 
 // ── Region maps ───────────────────────────────────────────────────────────────
@@ -131,6 +131,7 @@ function VideoTile({ item, onClick }: { item: VideoItem; onClick: () => void }) 
 // ── YouTube-like watch overlay ────────────────────────────────────────────────
 function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: VideoItem[]; onClose: () => void }) {
   const [current, setCurrent] = useState(item)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => { setCurrent(item) }, [item])
 
@@ -150,6 +151,22 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
 
   const relatedVideos = related.filter(v => v.videoId !== current.videoId).slice(0, 12)
 
+  // Auto-advance to next video when current one ends (YouTube postMessage API)
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(typeof e.data === 'string' ? e.data : JSON.stringify(e.data))
+        // YouTube sends {event:'onStateChange', info:0} when video ends
+        if (data.event === 'onStateChange' && data.info === 0) {
+          const next = relatedVideos[0]
+          if (next) setCurrent(next)
+        }
+      } catch { /* non-JSON messages ignored */ }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [relatedVideos])
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background:'#0f0f0f' }}>
       {/* Top bar */}
@@ -164,7 +181,7 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
         </button>
         <span className="flex-1" />
         <span className="sb-heading text-white font-bold text-base hidden sm:block">
-          Vyb<span style={{ color:'#C9A84C' }}>eline</span>
+          Vyb<span style={{ color:'#C9A84C' }}>LiNe</span>
         </span>
         <span className="flex-1" />
       </div>
@@ -178,8 +195,9 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
           <div className="w-full aspect-video rounded-xl overflow-hidden relative"
             style={{ background:'#000' }}>
             <iframe
+              ref={iframeRef}
               key={current.videoId}
-              src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`}
+              src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
               allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
               allowFullScreen
               className="w-full h-full"
@@ -278,6 +296,11 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
   const [showRegionPicker, setShowRegionPicker] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchMode, setSearchMode] = useState(false)
+  const [searching, setSearching] = useState(false)
+
   useEffect(() => { setRegion(detectRegion()) }, [])
 
   const fetchVideos = useCallback(async (regionCode: string, pageToken = '', append = false) => {
@@ -297,6 +320,33 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
   }, [])
 
   useEffect(() => { if (region) fetchVideos(region) }, [region, fetchVideos])
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    if (!q) return
+    setSearching(true)
+    setSearchMode(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Search failed')
+      setItems(data.items ?? [])
+      setNextPageToken(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Search failed')
+    } finally {
+      setSearching(false)
+      setLoading(false)
+    }
+  }
+
+  function clearSearch() {
+    setSearchMode(false)
+    setSearchQuery('')
+    fetchVideos(region)
+  }
 
   // Close picker on outside click
   useEffect(() => {
@@ -353,12 +403,38 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
                 <Waves className="w-3.5 h-3.5" style={{ color:'#060F1E' }} />
               </div>
               <span className="sb-heading text-white font-bold text-base hidden sm:block">
-                Vyb<span style={{ color:'#C9A84C' }}>eline</span>
+                Vyb<span style={{ color:'#C9A84C' }}>LiNe</span>
               </span>
             </div>
           </div>
 
-          <div className="flex-1" />
+          {/* CENTER: Search bar */}
+          <div className="flex-1 flex justify-center px-4">
+            <form onSubmit={handleSearch} className="w-full max-w-xl flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color:'rgba(201,168,76,0.5)' }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search videos…"
+                  className="w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none transition"
+                  style={{
+                    background:'rgba(255,255,255,0.06)',
+                    border:'1px solid rgba(201,168,76,0.2)',
+                    color:'#F0E6D0',
+                  }}
+                  onFocus={e => { e.currentTarget.style.border='1px solid rgba(201,168,76,0.5)' }}
+                  onBlur={e => { e.currentTarget.style.border='1px solid rgba(201,168,76,0.2)' }}
+                />
+              </div>
+              <button type="submit" disabled={searching || !searchQuery.trim()}
+                className="px-4 py-2 rounded-xl text-sm font-semibold transition disabled:opacity-40"
+                style={{ background:'linear-gradient(135deg,#B8923A,#C9A84C)', color:'#060F1E' }}>
+                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+              </button>
+            </form>
+          </div>
 
           {/* RIGHT: Studio + user or Sign In */}
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -386,10 +462,25 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
       </header>
 
       {/* ── Heading ── */}
-      <div className="w-full px-4 sm:px-6 pt-6 pb-3">
-        <h1 className="sb-heading text-xl font-bold text-white">
-          Trending in <span style={{ color:'#C9A84C' }}>{REGION_LABELS[region] ?? region}</span>
-        </h1>
+      <div className="w-full px-4 sm:px-6 pt-6 pb-3 flex items-center gap-4">
+        {searchMode ? (
+          <>
+            <button onClick={clearSearch}
+              className="flex items-center gap-1.5 text-sm transition"
+              style={{ color:'rgba(201,168,76,0.7)' }}
+              onMouseEnter={e => e.currentTarget.style.color='#C9A84C'}
+              onMouseLeave={e => e.currentTarget.style.color='rgba(201,168,76,0.7)'}>
+              <ArrowLeft className="w-4 h-4" /> Trending
+            </button>
+            <h1 className="sb-heading text-xl font-bold text-white">
+              Results for <span style={{ color:'#C9A84C' }}>"{searchQuery}"</span>
+            </h1>
+          </>
+        ) : (
+          <h1 className="sb-heading text-xl font-bold text-white">
+            Trending in <span style={{ color:'#C9A84C' }}>{REGION_LABELS[region] ?? region}</span>
+          </h1>
+        )}
       </div>
 
       {/* ── Grid ── */}

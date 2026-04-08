@@ -221,7 +221,7 @@ export default function AccountSettings({
             style={{ background:'linear-gradient(135deg, #B8923A 0%, #C9A84C 100%)' }}>
             <Video className="w-3 h-3" style={{ color:'#060F1E' }} />
           </div>
-          <span className="sb-heading text-muted/50 text-xs">Vybeline</span>
+          <span className="sb-heading text-muted/50 text-xs">VybLiNe</span>
         </div>
       </main>
     </div>

@@ -80,7 +80,7 @@ export default function DashboardClient({ user, initialJobs, ytConnected }: Prop
                 <Waves className="w-4 h-4" style={{ color:'#060F1E' }} />
               </div>
               <span className="sb-heading text-text font-bold text-xl tracking-wide group-hover:opacity-80 transition">
-                Vyb<span style={{ color:'var(--color-primary)' }}>eline</span>
+                Vyb<span style={{ color:'var(--color-primary)' }}>LiNe</span>
               </span>
             </Link>
             <span className="hidden sm:block text-muted text-xs px-2 py-0.5 rounded border border-border">Studio</span>
