@@ -114,27 +114,26 @@ export default function LoginPage() {
           {/* Colorful top-border accent */}
           <div className="rounded-[24px] p-[2px]"
             style={{ background:'linear-gradient(90deg, #00C8E0, #5B35B5, #E91E8C, #FF7043, #00C8E0)' }}>
-            <div className="rounded-[22px] bg-white px-8 py-10"
+            <div className="rounded-[22px] bg-white overflow-hidden"
               style={{ boxShadow:'0 20px 60px rgba(91,53,181,0.1), 0 4px 20px rgba(0,200,224,0.08)' }}>
 
-              {/* ── Logo ── */}
-              <div className="fu1 flex flex-col items-center mb-6">
-                <div className="logo-float w-full flex justify-center">
+              {/* ── Logo header band ── */}
+              <div className="fu1 flex flex-col items-center pt-8 pb-6 px-8"
+                style={{ background:'linear-gradient(160deg, #F0FAFE 0%, #EDF5FF 60%, #F5F0FF 100%)', borderBottom:'1px solid rgba(0,200,224,0.12)' }}>
+                <div className="logo-float">
                   <Image
                     src="/logo.png"
                     alt="VybLiNe logo"
-                    width={320}
-                    height={200}
-                    style={{
-                      objectFit: 'contain',
-                      width: '100%',
-                      maxWidth: 300,
-                      height: 'auto',
-                    }}
+                    width={260}
+                    height={160}
+                    style={{ objectFit:'contain', width:'100%', maxWidth:240, height:'auto' }}
                     priority
                   />
                 </div>
               </div>
+
+              {/* ── Form section ── */}
+              <div className="px-8 pt-7 pb-8">
 
               {/* ── Heading ── */}
               <div className="fu2 mb-6 text-center">
@@ -230,6 +229,7 @@ export default function LoginPage() {
                 </button>
               </p>
 
+              </div>{/* end form section */}
             </div>
           </div>
 
