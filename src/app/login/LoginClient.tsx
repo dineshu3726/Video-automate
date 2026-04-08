@@ -119,7 +119,6 @@ export default function LoginPage() {
 
               {/* ── Logo ── */}
               <div className="fu1 flex flex-col items-center mb-6">
-                {/* Logo image — mix-blend-mode:multiply removes white bg on white card */}
                 <div className="logo-float w-full flex justify-center">
                   <Image
                     src="/logo.png"
@@ -128,18 +127,13 @@ export default function LoginPage() {
                     height={200}
                     style={{
                       objectFit: 'contain',
-                      mixBlendMode: 'multiply',
                       width: '100%',
-                      maxWidth: 320,
+                      maxWidth: 300,
                       height: 'auto',
                     }}
                     priority
                   />
                 </div>
-                {/* Brand name with correct case — overrides the lowercase in the PNG */}
-                <p className="sb-heading font-bold text-center -mt-2" style={{ fontSize:'26px', letterSpacing:'-0.02em' }}>
-                  <span style={{ color:'#0097B2' }}>Vyb</span><span style={{ color:'#1A2535' }}>LiNe</span>
-                </p>
               </div>
 
               {/* ── Heading ── */}
