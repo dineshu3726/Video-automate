@@ -39,14 +39,14 @@ function avatarColor(name: string) { return AVATAR_COLORS[name.charCodeAt(0) % A
 function avatarInitial(name: string) { return (name?.[0] ?? '?').toUpperCase() }
 
 function detectRegion(): string {
-  if (typeof navigator === 'undefined') return 'US'
+  if (typeof navigator === 'undefined') return 'IN'
   for (const lang of [...(navigator.languages ?? [navigator.language])]) {
     const key = lang.toLowerCase()
     if (LOCALE_TO_REGION[key]) return LOCALE_TO_REGION[key]
     const base = key.split('-')[0]
     if (LOCALE_TO_REGION[base]) return LOCALE_TO_REGION[base]
   }
-  return 'US'
+  return 'IN'
 }
 
 function fmtViews(n: string) {
@@ -87,7 +87,7 @@ function VideoTile({ item, onClick }: { item: VideoItem; onClick: () => void }) 
     <button onClick={onClick} className="group text-left w-full focus:outline-none">
       {/* 16:9 Thumbnail */}
       <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-3"
-        style={{ background:'#1A1D3A' }}>
+        style={{ background:'var(--bg-surface2)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={item.thumbnail} alt={item.title} loading="lazy"
           className="w-full h-full object-cover group-hover:rounded-none transition-all duration-200" />
@@ -116,11 +116,11 @@ function VideoTile({ item, onClick }: { item: VideoItem; onClick: () => void }) 
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold leading-snug line-clamp-2 mb-1 group-hover:text-primary transition-colors"
-            style={{ color:'#F0F4FF' }}>
+            style={{ color:'var(--color-text)' }}>
             {item.title}
           </p>
-          <p className="text-xs truncate" style={{ color:'#8899BB' }}>{item.channelTitle}</p>
-          <p className="text-xs mt-0.5" style={{ color:'#8899BB' }}>
+          <p className="text-xs truncate" style={{ color:'var(--color-muted)' }}>{item.channelTitle}</p>
+          <p className="text-xs mt-0.5" style={{ color:'var(--color-muted)' }}>
             {fmtViews(item.viewCount)} views · {timeAgo(item.publishedAt)}
           </p>
         </div>
@@ -181,7 +181,7 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
           <X className="w-4 h-4" /> Close
         </button>
         <span className="flex-1" />
-        <span className="sb-heading text-white font-bold text-base hidden sm:block">
+        <span className="sb-heading font-bold text-base hidden sm:block" style={{ color:'#F0F4FF' }}>
           <span style={{ color:'#00C8E0' }}>Vyb</span>LiNe
         </span>
         <span className="flex-1" />
@@ -251,7 +251,7 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
                 className="flex gap-3 w-full text-left group focus:outline-none">
                 {/* Thumbnail */}
                 <div className="relative flex-shrink-0 w-[168px] aspect-video rounded-lg overflow-hidden"
-                  style={{ background:'#1A1D3A' }}>
+                  style={{ background:'#1a1a2e' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={v.thumbnail} alt={v.title} loading="lazy"
                     className="w-full h-full object-cover group-hover:opacity-80 transition-opacity" />
@@ -287,7 +287,7 @@ interface Props {
 }
 
 export default function TrendingGrid({ user = null, showStudioLink = false }: Props) {
-  const [region, setRegion] = useState('US')
+  const [region, setRegion] = useState('IN')
   const [items, setItems] = useState<VideoItem[]>([])
   const [nextPageToken, setNextPageToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -364,7 +364,7 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
     <>
       {/* ── Navbar ── */}
       <header className="sb-wave-border sticky top-0 z-20 border-b border-border"
-        style={{ background:'rgba(10,11,24,0.97)', backdropFilter:'blur(20px)' }}>
+        style={{ background:'var(--bg-surface)', backdropFilter:'blur(20px)' }}>
         <div className="w-full px-4 sm:px-6 h-14 flex items-center gap-4">
 
           {/* LEFT: ThemeToggle + Region picker + Logo */}
@@ -383,12 +383,12 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
 
               {showRegionPicker && (
                 <div className="absolute top-full left-0 mt-2 rounded-xl shadow-2xl z-30"
-                  style={{ width:220, maxHeight:300, overflowY:'auto', background:'#12142A', border:'1px solid rgba(0,200,224,0.2)' }}>
+                  style={{ width:220, maxHeight:300, overflowY:'auto', background:'var(--bg-surface)', border:'1px solid rgba(0,200,224,0.2)' }}>
                   {Object.entries(REGION_LABELS).map(([code, label]) => (
                     <button key={code} onClick={() => { setRegion(code); setShowRegionPicker(false) }}
                       className="w-full text-left px-4 py-2.5 text-sm"
-                      style={{ color: code === region ? '#00C8E0' : '#F0F4FF', background: code === region ? 'rgba(0,200,224,0.1)' : 'transparent' }}
-                      onMouseEnter={e => { if (code !== region) e.currentTarget.style.background='rgba(255,255,255,0.04)' }}
+                      style={{ color: code === region ? '#00C8E0' : 'var(--color-text)', background: code === region ? 'rgba(0,200,224,0.1)' : 'transparent' }}
+                      onMouseEnter={e => { if (code !== region) e.currentTarget.style.background='rgba(0,200,224,0.06)' }}
                       onMouseLeave={e => { if (code !== region) e.currentTarget.style.background='transparent' }}>
                       {label}
                     </button>
@@ -400,7 +400,7 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
             {/* Logo */}
             <div className="flex items-center gap-2">
               <VybLiNeIcon size={28} />
-              <span className="sb-heading text-white font-bold text-base hidden sm:block">
+              <span className="sb-heading font-bold text-base hidden sm:block" style={{ color:'var(--color-text)' }}>
                 <span style={{ color:'#00C8E0' }}>Vyb</span>LiNe
               </span>
             </div>
@@ -418,9 +418,9 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
                   placeholder="Search videos…"
                   className="w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none transition"
                   style={{
-                    background:'rgba(255,255,255,0.06)',
+                    background:'var(--bg-surface2)',
                     border:'1px solid rgba(0,200,224,0.2)',
-                    color:'#F0F4FF',
+                    color:'var(--color-text)',
                   }}
                   onFocus={e => { e.currentTarget.style.border='1px solid rgba(0,200,224,0.5)' }}
                   onBlur={e => { e.currentTarget.style.border='1px solid rgba(0,200,224,0.2)' }}
@@ -470,12 +470,12 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
               onMouseLeave={e => e.currentTarget.style.color='rgba(0,200,224,0.7)'}>
               <ArrowLeft className="w-4 h-4" /> Trending
             </button>
-            <h1 className="sb-heading text-xl font-bold text-white">
+            <h1 className="sb-heading text-xl font-bold" style={{ color:'var(--color-text)' }}>
               Results for <span style={{ color:'#00C8E0' }}>"{searchQuery}"</span>
             </h1>
           </>
         ) : (
-          <h1 className="sb-heading text-xl font-bold text-white">
+          <h1 className="sb-heading text-xl font-bold" style={{ color:'var(--color-text)' }}>
             Trending in <span style={{ color:'#00C8E0' }}>{REGION_LABELS[region] ?? region}</span>
           </h1>
         )}
@@ -487,7 +487,7 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
         {loading && (
           <div className="flex flex-col items-center justify-center py-32 gap-3">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color:'#00C8E0' }} />
-            <p className="text-sm" style={{ color:'#8899BB' }}>Loading trending videos…</p>
+            <p className="text-sm" style={{ color:'var(--color-muted)' }}>Loading trending videos…</p>
           </div>
         )}
 
@@ -498,8 +498,8 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
               <VybLiNeIcon size={28} />
             </div>
             <div>
-              <p className="sb-heading text-white font-semibold mb-1">Couldn't load trending videos</p>
-              <p className="text-sm max-w-xs" style={{ color:'#8899BB' }}>
+              <p className="sb-heading font-semibold mb-1" style={{ color:'var(--color-text)' }}>Couldn't load trending videos</p>
+              <p className="text-sm max-w-xs" style={{ color:'var(--color-muted)' }}>
                 {error.includes('not configured')
                   ? 'Add YOUTUBE_DATA_API_KEY to your environment variables to enable trending videos.'
                   : error}

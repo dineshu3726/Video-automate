@@ -8,7 +8,7 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <div className="min-h-screen" style={{ background:'#0f0f0f' }}>
+    <div className="min-h-screen bg-bg">
       <TrendingGrid
         user={user ? { email: user.email ?? '' } : null}
         showStudioLink={!!user}
