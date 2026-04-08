@@ -117,18 +117,29 @@ export default function LoginPage() {
             <div className="rounded-[22px] bg-white px-8 py-10"
               style={{ boxShadow:'0 20px 60px rgba(91,53,181,0.1), 0 4px 20px rgba(0,200,224,0.08)' }}>
 
-              {/* ── Logo (NO name below) ── */}
-              <div className="fu1 flex justify-center mb-8">
-                <div className="logo-float">
+              {/* ── Logo ── */}
+              <div className="fu1 flex flex-col items-center mb-6">
+                {/* Logo image — mix-blend-mode:multiply removes white bg on white card */}
+                <div className="logo-float w-full flex justify-center">
                   <Image
                     src="/logo.png"
-                    alt="VybLiNe"
-                    width={130}
-                    height={130}
-                    style={{ objectFit:'contain' }}
+                    alt="VybLiNe logo"
+                    width={320}
+                    height={200}
+                    style={{
+                      objectFit: 'contain',
+                      mixBlendMode: 'multiply',
+                      width: '100%',
+                      maxWidth: 320,
+                      height: 'auto',
+                    }}
                     priority
                   />
                 </div>
+                {/* Brand name with correct case — overrides the lowercase in the PNG */}
+                <p className="sb-heading font-bold text-center -mt-2" style={{ fontSize:'26px', letterSpacing:'-0.02em' }}>
+                  <span style={{ color:'#0097B2' }}>Vyb</span><span style={{ color:'#1A2535' }}>LiNe</span>
+                </p>
               </div>
 
               {/* ── Heading ── */}
