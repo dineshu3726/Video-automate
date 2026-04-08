@@ -134,6 +134,13 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
 
   useEffect(() => { setCurrent(item) }, [item])
 
+  // Mask browser address bar — push encrypted token URL so real video ID is hidden
+  useEffect(() => {
+    const prev = window.location.href
+    window.history.pushState(null, '', `/watch/${current.token}`)
+    return () => { window.history.replaceState(null, '', prev) }
+  }, [current.token])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
@@ -167,16 +174,23 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
 
         {/* ── Main player column ── */}
         <div className="flex-1 min-w-0">
-          {/* Video player — routed through our proxy to mask origin */}
-          <div className="w-full aspect-video rounded-xl overflow-hidden"
+          {/* Video player with branding overlays */}
+          <div className="w-full aspect-video rounded-xl overflow-hidden relative"
             style={{ background:'#000' }}>
             <iframe
               key={current.videoId}
-              src={`/api/stream/${current.token}`}
+              src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`}
               allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
               allowFullScreen
               className="w-full h-full"
             />
+            {/* ── Branding mask overlays (pointer-events:none so controls still work) ── */}
+            {/* Top-right YouTube watermark */}
+            <div className="absolute top-2 right-2 w-24 h-7 rounded pointer-events-none" style={{ background:'#000' }} />
+            {/* Bottom-right "Watch on YouTube" in control bar */}
+            <div className="absolute bottom-0 right-0 w-52 h-11 pointer-events-none" style={{ background:'#000' }} />
+            {/* Top-left channel name flash */}
+            <div className="absolute top-2 left-2 w-56 h-7 rounded pointer-events-none" style={{ background:'#000' }} />
           </div>
 
           {/* Video info */}
