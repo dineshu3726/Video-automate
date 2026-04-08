@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import { Loader2, X, ChevronDown, Eye, ThumbsUp, Clapperboard, Search, ArrowLeft } from 'lucide-react'
+import { Loader2, X, ChevronDown, Eye, ThumbsUp, Clapperboard, Search, ArrowLeft, Check, Globe } from 'lucide-react'
 import { VybLiNeIcon } from '@/components/VybLineLogo'
 import ThemeToggle from '@/components/ThemeToggle'
 
@@ -198,18 +198,18 @@ function WatchOverlay({ item, related, onClose }: { item: VideoItem; related: Vi
             <iframe
               ref={iframeRef}
               key={current.videoId}
-              src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
+              src={`https://www.youtube-nocookie.com/embed/${current.videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}`}
               allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
               allowFullScreen
               className="w-full h-full"
             />
-            {/* ── Branding mask overlays (pointer-events:none so controls still work) ── */}
+            {/* ── Branding mask overlays — pointer-events:auto blocks YouTube logo/links ── */}
             {/* Top-right YouTube watermark */}
-            <div className="absolute top-2 right-2 w-24 h-7 rounded pointer-events-none" style={{ background:'#000' }} />
-            {/* Bottom-right "Watch on YouTube" in control bar */}
-            <div className="absolute bottom-0 right-0 w-52 h-11 pointer-events-none" style={{ background:'#000' }} />
-            {/* Top-left channel name flash */}
-            <div className="absolute top-2 left-2 w-56 h-7 rounded pointer-events-none" style={{ background:'#000' }} />
+            <div className="absolute top-0 right-0 w-32 h-10 cursor-default" style={{ background:'#000', pointerEvents:'auto' }} />
+            {/* Bottom-right "Watch on YouTube" button */}
+            <div className="absolute bottom-0 right-0 w-56 h-12 cursor-default" style={{ background:'#000', pointerEvents:'auto' }} />
+            {/* Top-left channel name */}
+            <div className="absolute top-0 left-0 w-64 h-10 cursor-default" style={{ background:'#000', pointerEvents:'auto' }} />
           </div>
 
           {/* Video info */}
@@ -297,12 +297,11 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
   const [showRegionPicker, setShowRegionPicker] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
 
-  // Search state
+  // Search + region-search state
   const [searchQuery, setSearchQuery] = useState('')
   const [searchMode, setSearchMode] = useState(false)
   const [searching, setSearching] = useState(false)
-
-  useEffect(() => { setRegion(detectRegion()) }, [])
+  const [regionSearch, setRegionSearch] = useState('')
 
   const fetchVideos = useCallback(async (regionCode: string, pageToken = '', append = false) => {
     append ? setLoadingMore(true) : setLoading(true)
@@ -382,17 +381,46 @@ export default function TrendingGrid({ user = null, showStudioLink = false }: Pr
               </button>
 
               {showRegionPicker && (
-                <div className="absolute top-full left-0 mt-2 rounded-xl shadow-2xl z-30"
-                  style={{ width:220, maxHeight:300, overflowY:'auto', background:'var(--bg-surface)', border:'1px solid rgba(0,200,224,0.2)' }}>
-                  {Object.entries(REGION_LABELS).map(([code, label]) => (
-                    <button key={code} onClick={() => { setRegion(code); setShowRegionPicker(false) }}
-                      className="w-full text-left px-4 py-2.5 text-sm"
-                      style={{ color: code === region ? '#00C8E0' : 'var(--color-text)', background: code === region ? 'rgba(0,200,224,0.1)' : 'transparent' }}
-                      onMouseEnter={e => { if (code !== region) e.currentTarget.style.background='rgba(0,200,224,0.06)' }}
-                      onMouseLeave={e => { if (code !== region) e.currentTarget.style.background='transparent' }}>
-                      {label}
-                    </button>
-                  ))}
+                <div className="absolute top-full left-0 mt-2 rounded-2xl shadow-2xl z-30 overflow-hidden"
+                  style={{ width:260, background:'var(--bg-surface)', border:'1px solid rgba(0,200,224,0.25)', boxShadow:'0 20px 60px rgba(0,0,0,0.25), 0 4px 20px rgba(0,200,224,0.12)' }}>
+                  {/* Search input */}
+                  <div className="p-2 border-b" style={{ borderColor:'rgba(0,200,224,0.12)' }}>
+                    <div className="relative">
+                      <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color:'rgba(0,200,224,0.5)' }} />
+                      <input
+                        type="text"
+                        value={regionSearch}
+                        onChange={e => setRegionSearch(e.target.value)}
+                        placeholder="Search country…"
+                        autoFocus
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg outline-none"
+                        style={{ background:'var(--bg-surface2)', border:'1px solid rgba(0,200,224,0.2)', color:'var(--color-text)' }}
+                      />
+                    </div>
+                  </div>
+                  {/* Country list */}
+                  <div style={{ maxHeight:240, overflowY:'auto' }}>
+                    {Object.entries(REGION_LABELS)
+                      .filter(([, label]) => label.toLowerCase().includes(regionSearch.toLowerCase()))
+                      .map(([code, label]) => (
+                        <button key={code}
+                          onClick={() => { setRegion(code); setShowRegionPicker(false); setRegionSearch('') }}
+                          className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm transition-colors"
+                          style={{
+                            color: code === region ? '#00C8E0' : 'var(--color-text)',
+                            background: code === region ? 'rgba(0,200,224,0.1)' : 'transparent',
+                          }}
+                          onMouseEnter={e => { if (code !== region) e.currentTarget.style.background='rgba(0,200,224,0.06)' }}
+                          onMouseLeave={e => { if (code !== region) e.currentTarget.style.background= code === region ? 'rgba(0,200,224,0.1)' : 'transparent' }}>
+                          <span className="text-base leading-none">{label.split(' ')[0]}</span>
+                          <span className="flex-1 truncate" style={{ fontSize:13 }}>{label.split(' ').slice(1).join(' ')}</span>
+                          {code === region && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color:'#00C8E0' }} />}
+                        </button>
+                    ))}
+                    {Object.entries(REGION_LABELS).filter(([, label]) => label.toLowerCase().includes(regionSearch.toLowerCase())).length === 0 && (
+                      <p className="px-4 py-4 text-xs text-center" style={{ color:'var(--color-muted)' }}>No countries found</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

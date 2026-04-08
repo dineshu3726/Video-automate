@@ -10,6 +10,10 @@ const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["lati
 export const metadata: Metadata = {
   title: "VybLiNe — Watch. Create. Publish.",
   description: "Discover trending videos worldwide and publish short-form content to YouTube",
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
