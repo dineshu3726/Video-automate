@@ -77,9 +77,11 @@ export async function POST(request: Request) {
       .eq('id', jobId)
 
     console.error('[generate] error:', err)
+    const msg = err instanceof Error ? err.message : 'Generation failed'
+    const isOverloaded = msg.includes('503') || msg.includes('UNAVAILABLE') || msg.includes('high demand')
     return Response.json(
-      { error: err instanceof Error ? err.message : 'Generation failed' },
-      { status: 500 }
+      { error: isOverloaded ? 'AI model is busy right now. Please try again in a moment.' : msg },
+      { status: isOverloaded ? 503 : 500 }
     )
   }
 }

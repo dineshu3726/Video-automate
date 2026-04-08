@@ -3,6 +3,34 @@ import { extractVideoContext } from './urlAnalyzer'
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
+// Primary model with fallback for 503 overload errors
+const PRIMARY_MODEL  = 'gemini-2.5-flash'
+const FALLBACK_MODEL = 'gemini-2.0-flash'
+
+function isOverloaded(err: unknown): boolean {
+  const msg = String(err)
+  return msg.includes('503') || msg.includes('UNAVAILABLE') || msg.includes('high demand')
+}
+
+async function generateWithRetry(params: Parameters<typeof genAI.models.generateContent>[0]): Promise<ReturnType<typeof genAI.models.generateContent>> {
+  const delays = [1500, 3000, 5000]
+  for (let i = 0; i <= delays.length; i++) {
+    try {
+      return await genAI.models.generateContent(params)
+    } catch (err) {
+      if (!isOverloaded(err)) throw err
+      if (i === delays.length) {
+        // All retries on primary model failed — try fallback model once
+        console.warn('[gemini] Primary model overloaded, switching to fallback model')
+        return await genAI.models.generateContent({ ...params, model: FALLBACK_MODEL })
+      }
+      console.warn(`[gemini] 503 overloaded, retry ${i + 1} in ${delays[i]}ms…`)
+      await new Promise(r => setTimeout(r, delays[i]))
+    }
+  }
+  throw new Error('Unreachable')
+}
+
 export interface GeneratedContent {
   script: string
   veoPrompt: string
@@ -53,8 +81,8 @@ export async function generateVideoContentFromUrl(url: string): Promise<Generate
   if (ctx.platform === 'youtube') {
     // For YouTube, let Gemini watch the video directly (no mimeType — Gemini auto-detects YouTube URLs)
     // AND provide extracted metadata as text so it has rich context even if video is unavailable
-    result = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+    result = await generateWithRetry({
+      model: PRIMARY_MODEL,
       contents: [{
         role: 'user',
         parts: [
@@ -64,12 +92,12 @@ export async function generateVideoContentFromUrl(url: string): Promise<Generate
       }],
     }).catch(() =>
       // Fallback: text-only if video watch fails
-      genAI.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt })
+      generateWithRetry({ model: PRIMARY_MODEL, contents: prompt })
     )
   } else {
     // Instagram/Pinterest: use extracted OG metadata as context
-    result = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+    result = await generateWithRetry({
+      model: PRIMARY_MODEL,
       contents: prompt,
     })
   }
@@ -95,8 +123,8 @@ Return ONLY a valid JSON object with these exact keys:
 
 Respond with ONLY the JSON. No markdown, no code fences, no extra text.`
 
-  const result = await genAI.models.generateContent({
-    model: 'gemini-2.5-flash',
+  const result = await generateWithRetry({
+    model: PRIMARY_MODEL,
     contents: prompt,
   })
   const text = (result.text ?? '').trim()
